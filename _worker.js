@@ -251,7 +251,7 @@ function buildSingBox(raw) {
 	outbounds.push({type:"block",tag:"block"});
 	const autoOut = {type:"selector",tag:"auto",outbounds:["direct","block"]};
 	for (const n of nodeList) {
-		autoOut.outbounds.push(cleanNodeName(n.name));
+		autoOut.outbounds.push(n.name);
 		if (n.type === 'vmess') outbounds.push(buildVmessSB(n));
 		if (n.type === 'vless') outbounds.push(buildVlessSB(n));
 		if (n.type === 'trojan') outbounds.push(buildTrojanSB(n));
