@@ -1,4 +1,4 @@
-// CF-Workers-SUB 升级版｜修复Sing-box WireGuard未知字段报错｜无外部subconverter依赖
+// CF-Workers-SUB 最终兼容Sing-box1.13+全修复版 | 无第三方SUBAPI依赖
 let mytoken = 'ljf&rogerIPOOLGO';
 let guestToken = '';
 let BotToken = '';
@@ -25,7 +25,6 @@ vless://de14d094-e974-4d04-c1b0-3eab0cdfea22@de.yienergysmarthome.com:27143?encr
 trojan://SYkPhwiJzZ@de.yienergysmarthome.com:42741?security=tls&alpn=h2%2Chttp%2F1.1&insecure=0&allowInsecure=0&type=ws&path=%2Fxdlbv#%E5%BE%B7%E5%9B%BD%F0%9F%87%A9%F0%9F%87%AATR
 vless://8344f431-926e-4777-c049-c2aa07b16a8b@de.yienergysmarthome.com:56996?encryption=none&security=reality&sni=apple.com&fp=chrome&pbk=X2HLFnAutiGxWc7fj4a_laI93Fm71IEx-2nKsF0ZYCE&sid=5d0db1ff&pqv=QxR9ktI6j54XvgXHpsERXwg701Cqi0rVc3fdu7g9n3CyfEtwOvF17_-1xk_utN0Qm2D8lG_9x3oQnk555jWRBuLPj2sAXjXsN31v4VeESIDsMXFRuRo1KT3FdCgXluYbXqhJFCWth3eQwKeiOQOf39uztJVXt-aSlzwon74S4wMV8ctU4Cxic2RLdrlgjSbbizOzLKd06Yfdtqu0A0DE0rgb9q45qEfSI8dxRNyGKRkNgtuduJr4DfwMbHZ5l91IA_gCagFd4UCBmfXIJFnoDvRRz8vh0Klem4gPj2RYc_Uw3TnncM4y5JehM9pMq9kXPVvD2-b5vnWsukOJbDYdgO5B1n6DBsn71TtxG-gUbHP9_Us9uiT7An8anD3YfO6LCmUMDe3Lod4iMQeU--e-GQiEfCfs4eUc4r0kJs8M7rzq2XXYw2ZCa5iWfZX1Cn0aLq6UEyrbEV_g7V8okwe7isjfahliu8XSW6YBx3TLOHgXBZqulDN8SIuVMx5mIvWZXIqbG0BiJpdZ3CJOVpMBxVBGolFn_ADuyQgg18sue2sOxKugSrJaaqtU5ieFirzbCOolR8ePOH0-Iedrj7Q2LhQJjBWwbZ2bVqfPZiyqgbrfwmyyXYyaF5PVpDgNPqNaYgrsGQ4uLFvdpCgEjKviJGFxn8pW0inhRzZyuLD1Sm5DN6GWGLnPmU6WF_jp4DViN0_EfZChpU4u7Gd33SdAifgre448Hh7lr6jEr4wl9DMBZdkBsAeu8Uj9H8RgI8i1n4YrryUgIkULW7f3nB1fDMWVoTYkYOh6rj3waTQaErPKwlI73CmmcPfE3Bo0ksWeiRqwrA5HMPH8FcibVJ6aovOjOtKL99yVi-dHZP07HqTtyGIOmY0x74l4UBSo2LOZlbeClWFis288Gt2t8VIvtTMdQPjLx7cq4DCcKQlmMaWLu7klBgcEn8jy0ElVmnnvrFRss-asSrgQBqAx6cJVEVM4DwnTRyhWj2F8Pi73mdD7c9W6sOSAFbIwVei5LvdhmyA-8xIyfrPGH7nZzpLftRP5y5CgRH6SqM6K_FuxBijfF3pcilFcSY7TAr5etFRhKieW3uSVBcz77yge3gJjsX777iJGLMePHVpP_tcirHLCLPLrtgVqpDpTM82LTAG-pGtTRnb-jMu-CzNhZSnR_vQRnJQ0jyDOm0tsvuGl7UwXfIycxpEfFRdRkRyFQxdiq5FVbDyTLIWwxtAIBinDmElYHTSGLfQ2QLYFNgFppuhq8H5hdtwVwghIiTD_3TXSetmo0e3lLVniSQEwgYsxP562vkaId6-nn2rEfsCkMlAB2Z7Q7pf3Xb7XhuUD-ig-n0CsNbObA7Tm-jP7d6vXJ0Xbya-irePdFcaTtZ7v-tGeNJkeWsDmtZdCdRFXhL5rU7NcN_1-rRT12T5J7rws6ZYN9vFMZp_4l3NYzzcrsN-cf0mdoEq-BMGNFycPalQM1-7wdmzCLm-VoLauvgfr3_uQg62AUJhyeduPmaGmOfGsocqDPuIXMwpC7TJPA_z4nxcFRm3-psg-EHV08sIcV6hkVcHSbu8kDdiRCZz_3CefOjebEEb44UVAb0s80x3vvSocY-VXTWtR2x0IBI03bDiKhV49W5-7iLXCG5BaWZ1iv9EScSJgZ8uTNnT0v46KyRG1LlFQF91SiZw4hRJyP3j9RhXj6hwHvQiFlYVHJ6yBf1dlvMfvuTR3050nKFzfa4Qs4OGB0-zaERQBwoirG1p1zNYaddRds0siBgUEFNxXAYGTG2ImJu1zJ0TTbWOxT_1UrYWUpI6-hI7tqRpgXG55i9wD2DdXCF36_bT1bmD8HlWFiY02As9Ly6YfEORTyln7mm5McSj0FObWmA6gSV6pLBEsTXD8MPKhYVcryk1WvmW6i47oMzm91nrj8-XacuefG_AJvIpT6dRT2n0yFq8K2hOZPXUDFmAWj4syfYePm3cK6KNLl3XAF9pUHPBvfT4OIQ7sMAnU2-PijKM8jeXWCgWN_kPgMdCZbYwKvfrg2Aq_udMa2YnZ_25ZtJGxozVnWuclMRDLcKJA5BrPB--D4MpwUWzyn0ilXtViqKy3XXhmKmGyW7wnrgW63n634ro6EWDfuBSQGj6w_8z9sLVOxLuqPkLx-aWSYQYzQOf3TpVs2hPio7k9pETS1j-1_0USPhNHngQtK4X6QpRIB4NQ0cno1jzX2Xiy1K2n6GQ5eU9pZjsCRKFpRKaqkZ1HLgny9C3lriKd2YHFINca_U4VJPc8RBFqN97oaGWawT1ycypllglJU0bmDniGb5LKBuNNV88j-q8W1DizikhDUOEwiLhb5HUQqAF_Fb2_9FM8dxR7jtDYiHT-hs1D37eN4AIsFvedBoqn-9jVrMSlrrLWAjIDx13E_BcS0f-Oq-VNBwMQH8oKJSKDbXi8WuWZKPPOFtO0MT0NtfPmAWKhbRCj010JaGQP-Er8bdqbVfJUa9vUNWsUaCqBzLW0f3ud2hrZWLf04ZM70gcsF2AzOCIOXkj5WJNrl2zNJ1kHaUIS8_Eomap_pnWnhD9TVsI37DgPXdiEzcz1Az4Ivb4-C3XDDfpdz8juq1GnUmR9tKY&type=xhttp&host=de.yienergysmarthome.com&path=%2F&mode=auto#%E5%BE%B7%E5%9B%BD%F0%9F%87%A9%F0%9F%87%AAHY
 trojan://7XY3uKSX8k@de.yienergysmarthome.com:52141?security=tls&alpn=h2%2Chttp%2F1.1&insecure=0&allowInsecure=0&type=tcp&headerType=none#%E5%BE%B7%E5%9B%BD%F0%9F%87%A9%F0%9F%87%AATr1
-
 
 `;
 let urls = [];
@@ -244,7 +243,7 @@ proxy-groups:
     interval: 300
 ${SUBUpdateConfig}`;
 }
-// Sing-box 1.13+ 完整配置【已修复WG encryption报错】
+// Sing-box 1.13+ 完整配置｜修复入站port→listen_port
 function buildSingBox(raw) {
 	const nodeList = parseNodes(raw);
 	const outbounds = [];
@@ -264,18 +263,17 @@ function buildSingBox(raw) {
 		log:{level:"info"},
 		dns:{servers:[{address:"223.5.5.5"},{address:"114.114.114.114"}]},
 		inbounds:[
-    {
-        "type": "socks",
-        "listen": "127.0.0.1",
-        "listen_port": 1080
-    },
-    {
-        "type": "http",
-        "listen": "127.0.0.1",
-        "listen_port": 2080
-    }
-],
-
+			{
+				"type": "socks",
+				"listen": "127.0.0.1",
+				"listen_port": 1080
+			},
+			{
+				"type": "http",
+				"listen": "127.0.0.1",
+				"listen_port": 2080
+			}
+		],
 		outbounds,
 		route:{rules:[{outbound:"auto"}],"final":"auto"}
 	},null,2);
@@ -400,24 +398,71 @@ function buildWGClash(n) {
   udp: true`;
 }
 
-// ===================== Sing-box 节点生成【核心修复：移除encryption字段】 =====================
+// ===================== Sing-box 节点生成｜核心修复：TCP不生成transport =====================
 function buildVmessSB(n) {
-	return {
-		type:"vmess",tag:n.name,server:n.server,server_port:Number(n.port),uuid:n.uuid,alter_id:Number(n.aid),security:"auto",transport:{type:n.net,path:n.path,headers:{Host:n.host||n.sni}},tls:{enabled:n.tls,server_name:n.sni}
+	const item = {
+		type:"vmess",
+		tag:n.name,
+		server:n.server,
+		server_port:Number(n.port),
+		uuid:n.uuid,
+		alter_id:Number(n.aid),
+		security:"auto",
+		tls:{enabled:n.tls,server_name:n.sni || n.host}
 	};
+	// 仅非tcp传输才加入transport，彻底规避unknown transport type:tcp
+	if(n.net && n.net !== "tcp"){
+		item.transport = {
+			type:n.net,
+			path:n.path || "/",
+			headers:{Host:n.host || n.sni || ""}
+		}
+	}
+	return item;
 }
+
 function buildVlessSB(n) {
+	const item = {
+		type:"vless",
+		tag:n.name,
+		server:n.server,
+		server_port:Number(n.port),
+		uuid:n.uuid,
+		flow:n.flow,
+		tls:{enabled:n.tls,server_name:n.sni || ""}
+	};
+	if(n.net && n.net !== "tcp"){
+		item.transport = {
+			type:n.net,
+			path:n.path || "/"
+		}
+	}
+	return item;
+}
+
+function buildTrojanSB(n) {
 	return {
-		type:"vless",tag:n.name,server:n.server,server_port:Number(n.port),uuid:n.uuid,flow:n.flow,transport:{type:n.net,path:n.path},tls:{enabled:n.tls,server_name:n.sni}
+		type:"trojan",
+		tag:n.name,
+		server:n.server,
+		server_port:Number(n.port),
+		password:n.password,
+		tls:{enabled:true,server_name:n.sni}
 	};
 }
-function buildTrojanSB(n) {
-	return {type:"trojan",tag:n.name,server:n.server,server_port:Number(n.port),password:n.password,tls:{enabled:true,server_name:n.sni}};
-}
+
 function buildSSSB(n) {
-	return {type:"shadowsocks",tag:n.name,server:n.server,server_port:Number(n.port),method:n.method,password:n.password};
+	return {
+		type:"shadowsocks",
+		tag:n.name,
+		server:n.server,
+		server_port:Number(n.port),
+		method:n.method,
+		password:n.password
+	};
 }
-// 已删除废弃 encryption 字段，完全适配 Sing-box 1.13/1.14
+
+// WireGuard 移除废弃 encryption 字段
 function buildWGSB(n) {
 	return {
 		type:"wireguard",
