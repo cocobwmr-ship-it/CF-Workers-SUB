@@ -263,7 +263,19 @@ function buildSingBox(raw) {
 	return JSON.stringify({
 		log:{level:"info"},
 		dns:{servers:[{address:"223.5.5.5"},{address:"114.114.114.114"}]},
-		inbounds:[{type:"socks",listen:"127.0.0.1",port:1080},{type:"http",listen:"127.0.0.1",port:2080}],
+		inbounds:[
+    {
+        "type": "socks",
+        "listen": "127.0.0.1",
+        "listen_port": 1080
+    },
+    {
+        "type": "http",
+        "listen": "127.0.0.1",
+        "listen_port": 2080
+    }
+],
+
 		outbounds,
 		route:{rules:[{outbound:"auto"}],"final":"auto"}
 	},null,2);
