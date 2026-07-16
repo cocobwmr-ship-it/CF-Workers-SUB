@@ -304,8 +304,10 @@ function buildQuantumultX(raw) {
 // ===================== 节点解析器 =====================
 function parseVmess(line) {
 	const data = JSON.parse(atob(line.replace('vmess://','')));
+	let net = data.net;
+	if(net === "xhttp") net = "tcp";
 	return {
-		type:'vmess',name:data.ps,server:data.add,port:data.port,uuid:data.id,aid:data.aid,net:data.net,path:data.path||'',host:data.host||'',tls:data.tls==='tls',sni:data.sni||''
+		type:'vmess',name:data.ps,server:data.add,port:data.port,uuid:data.id,aid:data.aid,net:net,path:data.path||'',host:data.host||'',tls:data.tls==='tls',sni:data.sni||''
 	};
 }
 function parseVless(line) {
@@ -314,8 +316,11 @@ function parseVless(line) {
 	const hostPort = main[1].split('?')[0];
 	const [server,port] = hostPort.split(':');
 	const p = parseUrlParams(line);
-	return {type:'vless',name:p.remarks||server,server,port,uuid,flow:p.flow||'',tls:p.security==='tls',sni:p.sni||'',path:p.path||'',net:p.type||'tcp'};
+	let net = p.type || 'tcp';
+	if(net === "xhttp") net = "tcp";
+	return {type:'vless',name:p.remarks||server,server,port,uuid,flow:p.flow||'',tls:p.security==='tls',sni:p.sni||'',path:p.path||'',net:net};
 }
+
 function parseTrojan(line) {
 	const main = line.replace('trojan://','').split('@');
 	const pass = main[0];
