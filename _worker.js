@@ -275,7 +275,8 @@ function buildSingBox(raw) {
 			}
 		],
 		outbounds,
-		route:{rules:[{outbound:"auto"}],"final":"auto"}
+		route:{
+			"final":"auto"}
 	},null,2);
 }
 // Surge / Loon / QuantumultX 简易转换
