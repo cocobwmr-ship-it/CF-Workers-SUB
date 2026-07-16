@@ -410,8 +410,9 @@ function buildVmessSB(n) {
 		security:"auto",
 		tls:{enabled:n.tls,server_name:n.sni || n.host}
 	};
-	// 仅非tcp传输才加入transport，彻底规避unknown transport type:tcp
-	if(n.net && n.net !== "tcp"){
+	// 仅保留sing-box支持的传输：ws h2 http grpc，tcp/xhttp直接不生成transport
+	const allowTrans = ["ws","h2","http","grpc"];
+	if(n.net && allowTrans.includes(n.net)){
 		item.transport = {
 			type:n.net,
 			path:n.path || "/",
@@ -431,7 +432,9 @@ function buildVlessSB(n) {
 		flow:n.flow,
 		tls:{enabled:n.tls,server_name:n.sni || ""}
 	};
-	if(n.net && n.net !== "tcp"){
+	// 过滤xhttp/tcp，只保留官方支持传输类型
+	const allowTrans = ["ws","h2","http","grpc"];
+	if(n.net && allowTrans.includes(n.net)){
 		item.transport = {
 			type:n.net,
 			path:n.path || "/"
