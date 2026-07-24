@@ -34,16 +34,8 @@ trojan://7XY3uKSX8k@de.yienergysmarthome.com:52141?security=tls&alpn=h2%2Chttp%2
 `;
 
 let urls = [];
-
-// Clash / Surge / Quantumult X / Loon 等格式转换后端
-let subConverter = "SUBAPI.cmliussss.net";
-
-// Sing-box 专用转换后端
-// 留空时自动使用 SUBAPI
-// 推荐在 Cloudflare Worker 环境变量中设置：SINGBOX_API
-let singboxConverter = "";
-
-let subConfig = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/Clash/config/ACL4SSR_Online_MultiCountry.ini";
+let subConverter = "https://api.wcc.best"; //在线订阅转换后端，目前使用CM的订阅转换功能。支持自建psub 可自行搭建https://github.com/bulianglin/psub
+let subConfig = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/Clash/config/ACL4SSR_Online_MultiCountry.ini"; //订阅配置文件
 let subProtocol = 'https';
 
 export default {
@@ -52,43 +44,11 @@ export default {
 		const userAgent = userAgentHeader ? userAgentHeader.toLowerCase() : "null";
 		const url = new URL(request.url);
 		const token = url.searchParams.get('token');
-				// 读取 Cloudflare Worker 环境变量
 		mytoken = env.TOKEN || mytoken;
 		BotToken = env.TGTOKEN || BotToken;
 		ChatID = env.TGID || ChatID;
 		TG = env.TG || TG;
-
-		// Clash 等格式使用 SUBAPI
 		subConverter = env.SUBAPI || subConverter;
-
-		// Sing-box 使用独立后端
-		// 如果没有配置 SINGBOX_API，则回退到 SUBAPI
-		singboxConverter = env.SINGBOX_API || singboxConverter || subConverter;
-
-		// 处理 SUBAPI 地址
-		if (subConverter.startsWith("http://")) {
-			subConverter = subConverter.replace(/^http:\/\//, "");
-			subProtocol = "http";
-		} else {
-			subConverter = subConverter.replace(/^https:\/\//, "");
-			subProtocol = "https";
-		}
-
-		// 处理 Sing-box API 地址
-		let singboxProtocol = "https";
-
-		if (singboxConverter.startsWith("http://")) {
-			singboxProtocol = "http";
-		}
-
-		singboxConverter = singboxConverter
-			.replace(/^https?:\/\//, "")
-			.replace(/\/$/, "");
-
-		subConfig = env.SUBCONFIG || subConfig;
-		FileName = env.SUBNAME || FileName;
-		
-	
 		if (subConverter.includes("http://")) {
 			subConverter = subConverter.split("//")[1];
 			subProtocol = 'http';
@@ -250,21 +210,7 @@ export default {
 			} else if (订阅格式 == 'clash') {
 				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=clash&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
 			} else if (订阅格式 == 'singbox') {
-	// Sing-box 使用独立转换后端
-	subConverterUrl =
-		`${singboxProtocol}://${singboxConverter}` +
-		`/sub?target=singbox` +
-		`&url=${encodeURIComponent(订阅转换URL)}` +
-		`&insert=false` +
-		`&config=${encodeURIComponent(subConfig)}` +
-		`&emoji=true` +
-		`&list=false` +
-		`&tfo=false` +
-		`&scv=true` +
-		`&fdn=false` +
-		`&sort=false` +
-		`&new_name=true`;
-}
+				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=singbox&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
 			} else if (订阅格式 == 'surge') {
 				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=surge&ver=4&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
 			} else if (订阅格式 == 'quanx') {
@@ -274,94 +220,13 @@ export default {
 			}
 			//console.log(订阅转换URL);
 			try {
-	// 转换后端请求超时：20秒
-	const converterController = new AbortController();
-
-	const converterTimeout = setTimeout(() => {
-		converterController.abort();
-	}, 20000);
-
-	let subConverterResponse;
-
-	try {
-		subConverterResponse = await fetch(subConverterUrl, {
-			headers: {
-				'User-Agent':
-					userAgentHeader ||
-					'Mozilla/5.0 CF-Workers-SUB'
-			},
-			signal: converterController.signal
-		});
-	} finally {
-		clearTimeout(converterTimeout);
-	}
-
-	// 后端 HTTP 错误
-	if (!subConverterResponse.ok) {
-		console.error(
-			`订阅转换失败: HTTP ${subConverterResponse.status}`
-		);
-
-		// 转换失败时返回原始 Base64
-		return new Response(base64Data, {
-			headers: responseHeaders
-		});
-	}
-
-	let subConverterContent =
-		await subConverterResponse.text();
-
-	// 后端返回空内容
-	if (
-		!subConverterContent ||
-		subConverterContent.trim().length < 10
-	) {
-		console.error(
-			'订阅转换后端返回空内容'
-		);
-
-		return new Response(base64Data, {
-			headers: responseHeaders
-		});
-	}
-
-	// Clash 配置修复
-	if (订阅格式 == 'clash') {
-		subConverterContent =
-			await clashFix(subConverterContent);
-	}
-
-	// 非浏览器客户端添加下载文件名
-	if (!userAgent.includes('mozilla')) {
-		responseHeaders["Content-Disposition"] =
-			`attachment; filename*=utf-8''${encodeURIComponent(FileName)}`;
-	}
-
-	return new Response(
-		subConverterContent,
-		{
-			headers: responseHeaders
-		}
-	);
-
-} catch (error) {
-
-	console.error(
-		`订阅转换请求失败: ${
-			error?.name || 'Error'
-		} ${
-			error?.message || error
-		}`
-	);
-
-	// 转换后端失败时返回 Base64 原始节点
-	return new Response(
-		base64Data,
-		{
-			headers: responseHeaders
-		}
-	);
-}
+				const subConverterResponse = await fetch(subConverterUrl, { headers: { 'User-Agent': userAgentHeader } });//订阅转换
+				if (!subConverterResponse.ok) return new Response(base64Data, { headers: responseHeaders });
+				let subConverterContent = await subConverterResponse.text();
+				if (订阅格式 == 'clash') subConverterContent = await clashFix(subConverterContent);
+				// 只有非浏览器订阅才会返回SUBNAME
+				if (!userAgent.includes('mozilla')) responseHeaders["Content-Disposition"] = `attachment; filename*=utf-8''${encodeURIComponent(FileName)}`;
+				return new Response(subConverterContent, { headers: responseHeaders });
 			} catch (error) {
 				return new Response(base64Data, { headers: responseHeaders });
 			}
@@ -791,11 +656,7 @@ async function KV(request, env, txt = 'ADD.txt', guest) {
 					################################################################<br>
 					订阅转换配置<br>
 					---------------------------------------------------------------<br>
-					SUBAPI（Clash/其他订阅转换后端）:
-<strong>${subProtocol}://${subConverter}</strong><br>
-
-Sing-box API:
-<strong>${singboxProtocol}://${singboxConverter}</strong>
+					SUBAPI（订阅转换后端）: <strong>${subProtocol}://${subConverter}</strong><br>
 					SUBCONFIG（订阅转换配置文件）: <strong>${subConfig}</strong><br>
 					---------------------------------------------------------------<br>
 					################################################################<br>
