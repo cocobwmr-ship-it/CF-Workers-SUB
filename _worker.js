@@ -1,7 +1,7 @@
 
 // 部署完成后在网址后面加上这个，获取自建节点和机场聚合节点，/?token=auto或/auto或
 
-let mytoken = 'ljf&rogerIPOOLGO';
+let mytoken = 'ljf&rogerIPOOLGO';https://${subConverter}/sub?target=
 let guestToken = ''; //可以随便取，或者uuid生成，https://1024tools.com/uuid
 let BotToken = ''; //可以为空，或者@BotFather中输入/start，/newbot，并关注机器人
 let ChatID = ''; //可以为空，或者@userinfobot中获取，/start
@@ -34,7 +34,7 @@ trojan://7XY3uKSX8k@de.yienergysmarthome.com:52141?security=tls&alpn=h2%2Chttp%2
 `;
 
 let urls = [];
-let subConverter = "SUBAPI.cmliussss.net"; //在线订阅转换后端，目前使用CM的订阅转换功能。支持自建psub 可自行搭建https://github.com/bulianglin/psub
+let subConverter = "tools.huanghaiwan.com/api/convert"; //在线订阅转换后端，目前使用CM的订阅转换功能。支持自建psub 可自行搭建https://github.com/bulianglin/psub
 let subConfig = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/Clash/config/ACL4SSR_Online_MultiCountry.ini"; //订阅配置文件
 let subProtocol = 'https';
 
@@ -208,15 +208,17 @@ export default {
 			if (订阅格式 == 'base64' || token == fakeToken) {
 				return new Response(base64Data, { headers: responseHeaders });
 			} else if (订阅格式 == 'clash') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=clash&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
+				subConverterUrl = `${subProtocol}://${subConverter}/api/convert?url=${encodeURIComponent(url)}&target=clash&emoji=1&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
 			} else if (订阅格式 == 'singbox') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=singbox&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
+				subConverterUrl = `${subProtocol}://${subConverter}/api/convert?url=${encodeURIComponent(url)}&target=singbox&emoji=1&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
 			} else if (订阅格式 == 'surge') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=surge&ver=4&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
+				subConverterUrl = `${subProtocol}://${subConverter}/api/convert?url=${encodeURIComponent(url)}&target=surge&emoji=1&ver=4&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
 			} else if (订阅格式 == 'quanx') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=quanx&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&udp=true`;
+				subConverterUrl = `${subProtocol}://${subConverter}/api/convert?url=${encodeURIComponent(url)}&target=quanx&emoji=1&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&udp=true`;
 			} else if (订阅格式 == 'loon') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=loon&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false`;
+				subConverterUrl = `${subProtocol}://${subConverter}/api/convert?url=${encodeURIComponent(url)}&target=loon&emoji=1&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false`;
+			}
+				subConverterUrl = `${subProtocol}://${subConverter}/api/convert?url=${encodeURIComponent(url)}&target=mixed&emoji=1&emoji=1&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false`;
 			}
 			//console.log(订阅转换URL);
 			try {
