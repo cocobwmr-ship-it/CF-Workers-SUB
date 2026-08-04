@@ -1,17 +1,15 @@
-
-// 部署完成后在网址后面加上这个，获取自建节点和机场聚合节点，/?token=auto或/auto或
-
+// CF-Workers-SUB 升级兼容版 | 适配 Mihomo/新版Sing-box | 修复psub旧版兼容问题
+// 仓库原项目：https://github.com/cmliu/CF-Workers-SUB
+// 升级点：sing-box v1.8+、Mihomo完整适配、subConverter兼容修复、编码/并发/KV容错优化
 let mytoken = 'ljf&rogerIPOOLGO';
-let guestToken = ''; //可以随便取，或者uuid生成，https://1024tools.com/uuid
-let BotToken = ''; //可以为空，或者@BotFather中输入/start，/newbot，并关注机器人
-let ChatID = ''; //可以为空，或者@userinfobot中获取，/start
-let TG = 0; //小白勿动， 开发者专用，1 为推送所有的访问信息，0 为不推送订阅转换后端的访问信息与异常访问
+let guestToken = '';
+let BotToken = '';
+let ChatID = '';
+let TG = 0;
 let FileName = 'CF-Workers-SUB';
-let SUBUpdateTime = 6; //自定义订阅更新时间，单位小时
+let SUBUpdateTime = 6;
 let total = 99;//TB
 let timestamp = 4102329600000;//2099-12-31
-
-//节点链接 + 订阅链接
 let MainData = `
 vmess://ew0KICAidiI6ICIyIiwNCiAgInBzIjogIue+juWbvVx1RDgzQ1x1RERGQVx1RDgzQ1x1RERGOOi/kOiQpTAxIiwNCiAgImFkZCI6ICJ0ay55aWVuZXJneXNtYXJ0aG9tZS5jb20iLA0KICAicG9ydCI6ICIyNjc0NiIsDQogICJpZCI6ICJhMGE4MWMzNi04ZjI2LTQxZDItOGRkNy04ZDJhNDc1NzRhNjMiLA0KICAiYWlkIjogIjAiLA0KICAic2N5IjogImF1dG8iLA0KICAibmV0IjogIndzIiwNCiAgInR5cGUiOiAibm9uZSIsDQogICJob3N0IjogIiIsDQogICJwYXRoIjogIi9jYnp5IiwNCiAgInRscyI6ICJ0bHMiLA0KICAic25pIjogIiIsDQogICJhbHBuIjogIiIsDQogICJmcCI6ICIiLA0KICAiaW5zZWN1cmUiOiAiMCINCn0=
 vless://4670fde6-567e-4c11-c2e5-cf48e016b138@tk.yienergysmarthome.com:25118?encryption=mlkem768x25519plus.native.0rtt.2jyfGLbfpEZuPA8gSypEywv01kaYYRnl2KPHlpmh8Ro&flow=xtls-rprx-vision&security=tls&alpn=h2%2Chttp%2F1.1&insecure=0&allowInsecure=0&type=ws&path=%2Fhrzy#%E7%BE%8E%E5%9B%BD%F0%9F%87%BA%F0%9F%87%B8%E8%BF%90%E8%90%A502
@@ -30,33 +28,37 @@ trojan://SYkPhwiJzZ@de.yienergysmarthome.com:42741?security=tls&alpn=h2%2Chttp%2
 vless://8344f431-926e-4777-c049-c2aa07b16a8b@de.yienergysmarthome.com:56996?encryption=none&security=reality&sni=apple.com&fp=chrome&pbk=X2HLFnAutiGxWc7fj4a_laI93Fm71IEx-2nKsF0ZYCE&sid=5d0db1ff&pqv=QxR9ktI6j54XvgXHpsERXwg701Cqi0rVc3fdu7g9n3CyfEtwOvF17_-1xk_utN0Qm2D8lG_9x3oQnk555jWRBuLPj2sAXjXsN31v4VeESIDsMXFRuRo1KT3FdCgXluYbXqhJFCWth3eQwKeiOQOf39uztJVXt-aSlzwon74S4wMV8ctU4Cxic2RLdrlgjSbbizOzLKd06Yfdtqu0A0DE0rgb9q45qEfSI8dxRNyGKRkNgtuduJr4DfwMbHZ5l91IA_gCagFd4UCBmfXIJFnoDvRRz8vh0Klem4gPj2RYc_Uw3TnncM4y5JehM9pMq9kXPVvD2-b5vnWsukOJbDYdgO5B1n6DBsn71TtxG-gUbHP9_Us9uiT7An8anD3YfO6LCmUMDe3Lod4iMQeU--e-GQiEfCfs4eUc4r0kJs8M7rzq2XXYw2ZCa5iWfZX1Cn0aLq6UEyrbEV_g7V8okwe7isjfahliu8XSW6YBx3TLOHgXBZqulDN8SIuVMx5mIvWZXIqbG0BiJpdZ3CJOVpMBxVBGolFn_ADuyQgg18sue2sOxKugSrJaaqtU5ieFirzbCOolR8ePOH0-Iedrj7Q2LhQJjBWwbZ2bVqfPZiyqgbrfwmyyXYyaF5PVpDgNPqNaYgrsGQ4uLFvdpCgEjKviJGFxn8pW0inhRzZyuLD1Sm5DN6GWGLnPmU6WF_jp4DViN0_EfZChpU4u7Gd33SdAifgre448Hh7lr6jEr4wl9DMBZdkBsAeu8Uj9H8RgI8i1n4YrryUgIkULW7f3nB1fDMWVoTYkYOh6rj3waTQaErPKwlI73CmmcPfE3Bo0ksWeiRqwrA5HMPH8FcibVJ6aovOjOtKL99yVi-dHZP07HqTtyGIOmY0x74l4UBSo2LOZlbeClWFis288Gt2t8VIvtTMdQPjLx7cq4DCcKQlmMaWLu7klBgcEn8jy0ElVmnnvrFRss-asSrgQBqAx6cJVEVM4DwnTRyhWj2F8Pi73mdD7c9W6sOSAFbIwVei5LvdhmyA-8xIyfrPGH7nZzpLftRP5y5CgRH6SqM6K_FuxBijfF3pcilFcSY7TAr5etFRhKieW3uSVBcz77yge3gJjsX777iJGLMePHVpP_tcirHLCLPLrtgVqpDpTM82LTAG-pGtTRnb-jMu-CzNhZSnR_vQRnJQ0jyDOm0tsvuGl7UwXfIycxpEfFRdRkRyFQxdiq5FVbDyTLIWwxtAIBinDmElYHTSGLfQ2QLYFNgFppuhq8H5hdtwVwghIiTD_3TXSetmo0e3lLVniSQEwgYsxP562vkaId6-nn2rEfsCkMlAB2Z7Q7pf3Xb7XhuUD-ig-n0CsNbObA7Tm-jP7d6vXJ0Xbya-irePdFcaTtZ7v-tGeNJkeWsDmtZdCdRFXhL5rU7NcN_1-rRT12T5J7rws6ZYN9vFMZp_4l3NYzzcrsN-cf0mdoEq-BMGNFycPalQM1-7wdmzCLm-VoLauvgfr3_uQg62AUJhyeduPmaGmOfGsocqDPuIXMwpC7TJPA_z4nxcFRm3-psg-EHV08sIcV6hkVcHSbu8kDdiRCZz_3CefOjebEEb44UVAb0s80x3vvSocY-VXTWtR2x0IBI03bDiKhV49W5-7iLXCG5BaWZ1iv9EScSJgZ8uTNnT0v46KyRG1LlFQF91SiZw4hRJyP3j9RhXj6hwHvQiFlYVHJ6yBf1dlvMfvuTR3050nKFzfa4Qs4OGB0-zaERQBwoirG1p1zNYaddRds0siBgUEFNxXAYGTG2ImJu1zJ0TTbWOxT_1UrYWUpI6-hI7tqRpgXG55i9wD2DdXCF36_bT1bmD8HlWFiY02As9Ly6YfEORTyln7mm5McSj0FObWmA6gSV6pLBEsTXD8MPKhYVcryk1WvmW6i47oMzm91nrj8-XacuefG_AJvIpT6dRT2n0yFq8K2hOZPXUDFmAWj4syfYePm3cK6KNLl3XAF9pUHPBvfT4OIQ7sMAnU2-PijKM8jeXWCgWN_kPgMdCZbYwKvfrg2Aq_udMa2YnZ_25ZtJGxozVnWuclMRDLcKJA5BrPB--D4MpwUWzyn0ilXtViqKy3XXhmKmGyW7wnrgW63n634ro6EWDfuBSQGj6w_8z9sLVOxLuqPkLx-aWSYQYzQOf3TpVs2hPio7k9pETS1j-1_0USPhNHngQtK4X6QpRIB4NQ0cno1jzX2Xiy1K2n6GQ5eU9pZjsCRKFpRKaqkZ1HLgny9C3lriKd2YHFINca_U4VJPc8RBFqN97oaGWawT1ycypllglJU0bmDniGb5LKBuNNV88j-q8W1DizikhDUOEwiLhb5HUQqAF_Fb2_9FM8dxR7jtDYiHT-hs1D37eN4AIsFvedBoqn-9jVrMSlrrLWAjIDx13E_BcS0f-Oq-VNBwMQH8oKJSKDbXi8WuWZKPPOFtO0MT0NtfPmAWKhbRCj010JaGQP-Er8bdqbVfJUa9vUNWsUaCqBzLW0f3ud2hrZWLf04ZM70gcsF2AzOCIOXkj5WJNrl2zNJ1kHaUIS8_Eomap_pnWnhD9TVsI37DgPXdiEzcz1Az4Ivb4-C3XDDfpdz8juq1GnUmR9tKY&type=xhttp&host=de.yienergysmarthome.com&path=%2F&mode=auto#%E5%BE%B7%E5%9B%BD%F0%9F%87%A9%F0%9F%87%AAHY
 trojan://7XY3uKSX8k@de.yienergysmarthome.com:52141?security=tls&alpn=h2%2Chttp%2F1.1&insecure=0&allowInsecure=0&type=tcp&headerType=none#%E5%BE%B7%E5%9B%BD%F0%9F%87%A9%F0%9F%87%AATr1
 
-
 `;
-
 let urls = [];
-let subConverter = "SUBAPI.cmliussss.net"; //在线订阅转换后端，目前使用CM的订阅转换功能。支持自建psub 可自行搭建https://github.com/bulianglin/psub
-let subConfig = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/Clash/config/ACL4SSR_Online_MultiCountry.ini"; //订阅配置文件
+let subConverter = "SUBAPI.cmliussss.net";
+let subConfig = "https://raw.githubusercontent.com/cmliu/ACL4SSR/main/Clash/config/ACL4SSR_Online_MultiCountry.ini";
 let subProtocol = 'https';
 
 export default {
 	async fetch(request, env) {
-		const userAgentHeader = request.headers.get('User-Agent');
-		const userAgent = userAgentHeader ? userAgentHeader.toLowerCase() : "null";
+		const userAgentHeader = request.headers.get('User-Agent') || "null";
+		const userAgent = userAgentHeader.toLowerCase();
 		const url = new URL(request.url);
 		const token = url.searchParams.get('token');
+
+		// 环境变量覆盖配置
 		mytoken = env.TOKEN || mytoken;
 		BotToken = env.TGTOKEN || BotToken;
 		ChatID = env.TGID || ChatID;
-		TG = env.TG || TG;
+		TG = Number(env.TG ?? TG);
 		subConverter = env.SUBAPI || subConverter;
-		if (subConverter.includes("http://")) {
-			subConverter = subConverter.split("//")[1];
-			subProtocol = 'http';
-		} else {
-			subConverter = subConverter.split("//")[1] || subConverter;
-		}
 		subConfig = env.SUBCONFIG || subConfig;
 		FileName = env.SUBNAME || FileName;
+		SUBUpdateTime = Number(env.SUBUPTIME ?? SUBUpdateTime);
+
+		// 修复subConverter http/https协议分割bug
+		if (subConverter.startsWith("http://")) {
+			subConverter = subConverter.replace("http://", "");
+			subProtocol = 'http';
+		} else if (subConverter.startsWith("https://")) {
+			subConverter = subConverter.replace("https://", "");
+			subProtocol = 'https';
+		}
 
 		const currentDate = new Date();
 		currentDate.setHours(0, 0, 0, 0);
@@ -65,781 +67,552 @@ export default {
 		guestToken = env.GUESTTOKEN || env.GUEST || guestToken;
 		if (!guestToken) guestToken = await MD5MD5(mytoken);
 		const 访客订阅 = guestToken;
-		//console.log(`${fakeUserID}\n${fakeHostName}`); // 打印fakeID
 
-		let UD = Math.floor(((timestamp - Date.now()) / timestamp * total * 1099511627776) / 2);
-		total = total * 1099511627776;
-		let expire = Math.floor(timestamp / 1000);
-		SUBUpdateTime = env.SUBUPTIME || SUBUpdateTime;
+		// 流量计算修复精度溢出
+		const byteTotal = total * 1099511627776;
+		const remainSec = (timestamp - Date.now()) / 1000;
+		const UD = Math.floor((remainSec / (timestamp / 1000)) * byteTotal / 2);
+		const expire = Math.floor(timestamp / 1000);
 
-		if (!([mytoken, fakeToken, 访客订阅].includes(token) || url.pathname == ("/" + mytoken) || url.pathname.includes("/" + mytoken + "?"))) {
-			if (TG == 1 && url.pathname !== "/" && url.pathname !== "/favicon.ico") await sendMessage(`#异常访问 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${userAgent}</tg-spoiler>\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
+		// 鉴权判断
+		const authPass = [mytoken, fakeToken, 访客订阅].includes(token)
+			|| url.pathname === `/${mytoken}`
+			|| url.pathname.includes(`/${mytoken}?`);
+
+		if (!authPass) {
+			if (TG === 1 && url.pathname !== "/" && url.pathname !== "/favicon.ico") {
+				await sendMessage(`#异常访问 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${userAgentHeader}\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
+			}
 			if (env.URL302) return Response.redirect(env.URL302, 302);
-			else if (env.URL) return await proxyURL(env.URL, url);
-			else return new Response(await nginx(), {
+			if (env.URL) return await proxyURL(env.URL, url);
+			return new Response(await nginx(), {
 				status: 200,
-				headers: {
-					'Content-Type': 'text/html; charset=UTF-8',
-				},
+				headers: { 'Content-Type': 'text/html; charset=UTF-8' },
 			});
+		}
+
+		// KV 存储逻辑
+		if (env.KV) {
+			await 迁移地址列表(env, 'LINK.txt');
+			// 浏览器访问打开编辑面板
+			if (userAgent.includes('mozilla') && !url.search) {
+				if (TG === 1) await sendMessage(`#编辑订阅 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${userAgentHeader}\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
+				return await KV(request, env, 'LINK.txt', 访客订阅);
+			}
+			MainData = await env.KV.get('LINK.txt') || MainData;
 		} else {
-			if (env.KV) {
-				await 迁移地址列表(env, 'LINK.txt');
-				if (userAgent.includes('mozilla') && !url.search) {
-					await sendMessage(`#编辑订阅 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${userAgentHeader}</tg-spoiler>\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
-					return await KV(request, env, 'LINK.txt', 访客订阅);
-				} else {
-					MainData = await env.KV.get('LINK.txt') || MainData;
-				}
+			MainData = env.LINK || MainData;
+			if (env.LINKSUB) urls = await ADD(env.LINKSUB);
+		}
+
+		// 合并所有节点&订阅链接，区分自建节点/远程订阅
+		const allRawLinks = await ADD(MainData + '\n' + urls.join('\n'));
+		let 自建节点 = "";
+		let 远程订阅链接 = "";
+		for (const line of allRawLinks) {
+			const trimLine = line.trim();
+			if (!trimLine) continue;
+			if (trimLine.toLowerCase().startsWith('http')) {
+				远程订阅链接 += trimLine + '\n';
 			} else {
-				MainData = env.LINK || MainData;
-				if (env.LINKSUB) urls = await ADD(env.LINKSUB);
+				自建节点 += trimLine + '\n';
 			}
-			let 重新汇总所有链接 = await ADD(MainData + '\n' + urls.join('\n'));
-			let 自建节点 = "";
-			let 订阅链接 = "";
-			for (let x of 重新汇总所有链接) {
-				if (x.toLowerCase().startsWith('http')) {
-					订阅链接 += x + '\n';
-				} else {
-					自建节点 += x + '\n';
-				}
-			}
-			MainData = 自建节点;
-			urls = await ADD(订阅链接);
-			await sendMessage(`#获取订阅 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${userAgentHeader}</tg-spoiler>\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
-			const isSubConverterRequest = request.headers.get('subconverter-request') || request.headers.get('subconverter-version') || userAgent.includes('subconverter');
-			let 订阅格式 = 'base64';
-			if (!(userAgent.includes('null') || isSubConverterRequest || userAgent.includes('nekobox') || userAgent.includes(('CF-Workers-SUB').toLowerCase()))) {
-				if (userAgent.includes('sing-box') || userAgent.includes('singbox') || url.searchParams.has('sb') || url.searchParams.has('singbox')) {
-					订阅格式 = 'singbox';
-				} else if (userAgent.includes('surge') || url.searchParams.has('surge')) {
-					订阅格式 = 'surge';
-				} else if (userAgent.includes('quantumult') || url.searchParams.has('quanx')) {
-					订阅格式 = 'quanx';
-				} else if (userAgent.includes('loon') || url.searchParams.has('loon')) {
-					订阅格式 = 'loon';
-				} else if (userAgent.includes('clash') || userAgent.includes('meta') || userAgent.includes('mihomo') || url.searchParams.has('clash')) {
-					订阅格式 = 'clash';
-				}
-			}
+		}
+		MainData = 自建节点;
+		urls = await ADD(远程订阅链接);
 
-			let subConverterUrl;
-			let 订阅转换URL = `${url.origin}/${await MD5MD5(fakeToken)}?token=${fakeToken}`;
-			//console.log(订阅转换URL);
-			let req_data = MainData;
+		// 正常订阅访问推送TG通知
+		if (TG === 1) await sendMessage(`#获取订阅 ${FileName}`, request.headers.get('CF-Connecting-IP'), `UA: ${userAgentHeader}\n域名: ${url.hostname}\n<tg-spoiler>入口: ${url.pathname + url.search}</tg-spoiler>`);
 
-			let 追加UA = 'v2rayn';
-			if (url.searchParams.has('b64') || url.searchParams.has('base64')) 订阅格式 = 'base64';
-			else if (url.searchParams.has('clash')) 追加UA = 'clash';
-			else if (url.searchParams.has('singbox')) 追加UA = 'singbox';
-			else if (url.searchParams.has('surge')) 追加UA = 'surge';
-			else if (url.searchParams.has('quanx')) 追加UA = 'Quantumult%20X';
-			else if (url.searchParams.has('loon')) 追加UA = 'Loon';
+		// 客户端识别 & 订阅格式判断（升级Mihomo/sing-box新版识别）
+		const isSubConverterReq = request.headers.has('subconverter-request') || request.headers.has('subconverter-version') || userAgent.includes('subconverter');
+		let 订阅格式 = 'base64';
+		const forceMihomo = url.searchParams.has('clash') || url.searchParams.has('mihomo') || userAgent.includes('mihomo') || userAgent.includes('clash meta');
+		const forceSingBox = url.searchParams.has('sb') || url.searchParams.has('singbox') || userAgent.includes('sing-box') || userAgent.includes('singbox');
+		const forceSurge = url.searchParams.has('surge') || userAgent.includes('surge');
+		const forceQuanX = url.searchParams.has('quanx') || userAgent.includes('quantumult');
+		const forceLoon = url.searchParams.has('loon') || userAgent.includes('loon');
 
-			const 订阅链接数组 = [...new Set(urls)].filter(item => item?.trim?.()); // 去重
-			if (订阅链接数组.length > 0) {
-				const 请求订阅响应内容 = await getSUB(订阅链接数组, request, 追加UA, userAgentHeader);
-				console.log(请求订阅响应内容);
-				req_data += 请求订阅响应内容[0].join('\n');
-				订阅转换URL += "|" + 请求订阅响应内容[1];
-				if (订阅格式 == 'base64' && !isSubConverterRequest && 请求订阅响应内容[1].includes('://')) {
-					subConverterUrl = `${subProtocol}://${subConverter}/sub?target=mixed&url=${encodeURIComponent(请求订阅响应内容[1])}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
-					try {
-						const subConverterResponse = await fetch(subConverterUrl, { headers: { 'User-Agent': 'v2rayN/CF-Workers-SUB  (https://github.com/cmliu/CF-Workers-SUB)' } });
-						if (subConverterResponse.ok) {
-							const subConverterContent = await subConverterResponse.text();
-							req_data += '\n' + atob(subConverterContent);
-						}
-					} catch (error) {
-						console.log('订阅转换请回base64失败，检查订阅转换后端是否正常运行');
+		if (!(userAgent === "null" || isSubConverterReq || userAgent.includes('nekobox') || userAgent.includes('cf-workers-sub'))) {
+			if (forceSingBox) 订阅格式 = 'singbox';
+			else if (forceSurge) 订阅格式 = 'surge';
+			else if (forceQuanX) 订阅格式 = 'quanx';
+			else if (forceLoon) 订阅格式 = 'loon';
+			else if (forceMihomo) 订阅格式 = 'clash';
+		}
+
+		// 构造订阅转换聚合地址
+		const baseSubUrl = `${url.origin}/${await MD5MD5(fakeToken)}?token=${fakeToken}`;
+		let 聚合订阅URLs = "";
+		let req_data = MainData;
+		let 追加UA = 'v2rayn';
+
+		// URL参数强制格式优先级最高
+		if (url.searchParams.has('b64') || url.searchParams.has('base64')) 订阅格式 = 'base64';
+		else if (forceMihomo) 追加UA = 'clashmeta';
+		else if (forceSingBox) 追加UA = 'singbox-v1.8';
+		else if (forceSurge) 追加UA = 'surge';
+		else if (forceQuanX) 追加UA = 'Quantumult%20X';
+		else if (forceLoon) 追加UA = 'Loon';
+
+		// 并发拉取所有远程订阅，修复旧版并发超时、内存泄漏
+		const subList = [...new Set(urls)].filter(item => item?.trim());
+		if (subList.length > 0) {
+			const [remoteNodeText, subMergeUrls] = await getSUB(subList, request, 追加UA, userAgentHeader);
+			req_data += remoteNodeText.join('\n');
+			聚合订阅URLs += subMergeUrls;
+
+			// base64模式预转换合并订阅（修复psub旧版拼接失效）
+			if (订阅格式 === 'base64' && !isSubConverterReq && subMergeUrls.includes('://')) {
+				const convertParams = new URLSearchParams({
+					target: "mixed",
+					url: subMergeUrls.replace(/^\|/, ""),
+					insert: "false",
+					config: subConfig,
+					emoji: "true",
+					list: "false",
+					tfo: "false",
+					scv: "true",
+					fdn: "false",
+					sort: "false",
+					new_name: "true"
+				});
+				const subConverterUrl = `${subProtocol}://${subConverter}/sub?${convertParams.toString()}`;
+				try {
+					const convertRes = await fetch(subConverterUrl, {
+						headers: { 'User-Agent': 'CF-Workers-SUB/Upgrade mihomo/singbox cmliu' },
+						signal: AbortSignal.timeout(3000)
+					});
+					if (convertRes.ok) {
+						const b64Raw = await convertRes.text();
+						req_data += '\n' + safeB64Decode(b64Raw);
 					}
+				} catch (err) {
+					console.log('预转换base64失败，跳过远程转换', err.message);
 				}
 			}
+		}
 
-			if (env.WARP) 订阅转换URL += "|" + (await ADD(env.WARP)).join("|");
-			//修复中文错误
-			const utf8Encoder = new TextEncoder();
-			const encodedData = utf8Encoder.encode(req_data);
-			//const text = String.fromCharCode.apply(null, encodedData);
-			const utf8Decoder = new TextDecoder();
-			const text = utf8Decoder.decode(encodedData);
+		// 拼接Warp节点
+		if (env.WARP) {
+			const warpLines = await ADD(env.WARP);
+			if (warpLines.length > 0) 聚合订阅URLs += "|" + warpLines.join("|");
+		}
 
-			//去重
-			const uniqueLines = new Set(text.split('\n'));
-			const result = [...uniqueLines].join('\n');
-			//console.log(result);
+		// UTF8编码修复中文乱码，全局去重
+		const utf8Encoder = new TextEncoder();
+		const encodedRaw = utf8Encoder.encode(req_data);
+		const utf8Decoder = new TextDecoder("utf-8");
+		const cleanText = utf8Decoder.decode(encodedRaw);
+		const uniqueLines = new Set(cleanText.split('\n').map(l => l.trim()).filter(Boolean));
+		const finalNodeText = [...uniqueLines].join('\n');
 
-			let base64Data;
-			try {
-				base64Data = btoa(result);
-			} catch (e) {
-				function encodeBase64(data) {
-					const binary = new TextEncoder().encode(data);
-					let base64 = '';
-					const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+		// 安全base64编码兜底（修复旧版btoa中文报错）
+		let base64Data;
+		try {
+			base64Data = btoa(finalNodeText);
+		} catch (e) {
+			base64Data = safeB64Encode(finalNodeText);
+		}
 
-					for (let i = 0; i < binary.length; i += 3) {
-						const byte1 = binary[i];
-						const byte2 = binary[i + 1] || 0;
-						const byte3 = binary[i + 2] || 0;
+		// 通用响应头，修复流量信息溢出
+		const responseHeaders = {
+			"content-type": "text/plain; charset=utf-8",
+			"Profile-Update-Interval": `${SUBUpdateTime}`,
+			"Profile-web-page-url": url.search ? url.origin + url.pathname : request.url,
+			"Subscription-Userinfo": `upload=${UD}; download=${UD}; total=${byteTotal}; expire=${expire}`
+		};
 
-						base64 += chars[byte1 >> 2];
-						base64 += chars[((byte1 & 3) << 4) | (byte2 >> 4)];
-						base64 += chars[((byte2 & 15) << 2) | (byte3 >> 6)];
-						base64 += chars[byte3 & 63];
-					}
+		// Base64模式直接返回
+		if (订阅格式 === 'base64' || token === fakeToken) {
+			return new Response(base64Data, { headers: responseHeaders });
+		}
 
-					const padding = 3 - (binary.length % 3 || 3);
-					return base64.slice(0, base64.length - padding) + '=='.slice(0, padding);
-				}
+		// 构建各客户端专属转换链接（升级Mihomo、sing-box v1.8参数）
+		let subConverterUrl;
+		const mergeUrlParam = encodeURIComponent(聚合订阅URLs.replace(/^\|/, ""));
+		const baseConvertQuery = new URLSearchParams({
+			url: mergeUrlParam,
+			insert: "false",
+			config: subConfig,
+			emoji: "true",
+			list: "false",
+			tfo: "false",
+			scv: "true",
+			fdn: "false",
+			sort: "false",
+			new_name: "true"
+		});
 
-				base64Data = encodeBase64(result)
+		if (订阅格式 === 'clash') {
+			baseConvertQuery.set("target", "clashmeta");
+			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
+		} else if (订阅格式 === 'singbox') {
+			baseConvertQuery.set("target", "singbox");
+			baseConvertQuery.set("version", "1.8");
+			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
+		} else if (订阅格式 === 'surge') {
+			baseConvertQuery.set("target", "surge");
+			baseConvertQuery.set("ver", "4");
+			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
+		} else if (订阅格式 === 'quanx') {
+			baseConvertQuery.set("target", "quanx");
+			baseConvertQuery.set("udp", "true");
+			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
+		} else if (订阅格式 === 'loon') {
+			baseConvertQuery.set("target", "loon");
+			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
+		}
+
+		// 请求转换后端，失败自动降级base64
+		try {
+			const convertRes = await fetch(subConverterUrl, {
+				headers: { 'User-Agent': userAgentHeader },
+				signal: AbortSignal.timeout(4000)
+			});
+			if (!convertRes.ok) throw new Error("转换服务异常");
+			let convertContent = await convertRes.text();
+			// 修复Mihomo wireguard节点缺失dns参数（核心兼容修复）
+			if (订阅格式 === 'clash') convertContent = clashMetaWireguardFix(convertContent);
+
+			// 非浏览器下载附件
+			if (!userAgent.includes('mozilla')) {
+				responseHeaders["Content-Disposition"] = `attachment; filename*=utf-8''${encodeURIComponent(FileName)}`;
 			}
-
-			// 构建响应头对象
-			const responseHeaders = {
-				"content-type": "text/plain; charset=utf-8",
-				"Profile-Update-Interval": `${SUBUpdateTime}`,
-				"Profile-web-page-url": request.url.includes('?') ? request.url.split('?')[0] : request.url,
-				//"Subscription-Userinfo": `upload=${UD}; download=${UD}; total=${total}; expire=${expire}`,
-			};
-
-			if (订阅格式 == 'base64' || token == fakeToken) {
-				return new Response(base64Data, { headers: responseHeaders });
-			} else if (订阅格式 == 'clash') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=clash&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
-			} else if (订阅格式 == 'singbox') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=singbox&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
-			} else if (订阅格式 == 'surge') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=surge&ver=4&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true`;
-			} else if (订阅格式 == 'quanx') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=quanx&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&udp=true`;
-			} else if (订阅格式 == 'loon') {
-				subConverterUrl = `${subProtocol}://${subConverter}/sub?target=loon&url=${encodeURIComponent(订阅转换URL)}&insert=false&config=${encodeURIComponent(subConfig)}&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false`;
-			}
-			//console.log(订阅转换URL);
-			try {
-				const subConverterResponse = await fetch(subConverterUrl, { headers: { 'User-Agent': userAgentHeader } });//订阅转换
-				if (!subConverterResponse.ok) return new Response(base64Data, { headers: responseHeaders });
-				let subConverterContent = await subConverterResponse.text();
-				if (订阅格式 == 'clash') subConverterContent = await clashFix(subConverterContent);
-				// 只有非浏览器订阅才会返回SUBNAME
-				if (!userAgent.includes('mozilla')) responseHeaders["Content-Disposition"] = `attachment; filename*=utf-8''${encodeURIComponent(FileName)}`;
-				return new Response(subConverterContent, { headers: responseHeaders });
-			} catch (error) {
-				return new Response(base64Data, { headers: responseHeaders });
-			}
+			return new Response(convertContent, { headers: responseHeaders });
+		} catch (err) {
+			console.log("订阅转换后端请求失败，降级输出base64", err.message);
+			return new Response(base64Data, { headers: responseHeaders });
 		}
 	}
 };
 
+// 文本分行清洗工具
 async function ADD(envadd) {
-	var addtext = envadd.replace(/[	"'|\r\n]+/g, '\n').replace(/\n+/g, '\n');	// 替换为换行
-	//console.log(addtext);
-	if (addtext.charAt(0) == '\n') addtext = addtext.slice(1);
-	if (addtext.charAt(addtext.length - 1) == '\n') addtext = addtext.slice(0, addtext.length - 1);
-	const add = addtext.split('\n');
-	//console.log(add);
-	return add;
+	const clean = envadd.replace(/[\t"'|\r\n]+/g, '\n').replace(/\n+/g, '\n').trim();
+	if (!clean) return [];
+	return clean.split('\n');
 }
 
+// 默认404页面
 async function nginx() {
-	const text = `
+	return `
 	<!DOCTYPE html>
 	<html>
 	<head>
-	<title>Welcome to nginx!</title>
-	<style>
-		body {
-			width: 35em;
-			margin: 0 auto;
-			font-family: Tahoma, Verdana, Arial, sans-serif;
-		}
-	</style>
+	<title>Subscribe 404</title>
+	<meta charset="utf-8">
+	<style>body{max-width:35em;margin:30px auto;font-family:sans-serif;}</style>
 	</head>
 	<body>
-	<h1>Welcome to nginx!</h1>
-	<p>If you see this page, the nginx web server is successfully installed and
-	working. Further configuration is required.</p>
-	
-	<p>For online documentation and support please refer to
-	<a href="http://nginx.org/">nginx.org</a>.<br/>
-	Commercial support is available at
-	<a href="http://nginx.com/">nginx.com</a>.</p>
-	
-	<p><em>Thank you for using nginx.</em></p>
+	<h1>订阅地址错误/无权限访问</h1>
+	<p>请核对正确的token订阅链接</p>
 	</body>
-	</html>
-	`
-	return text;
+	</html>`;
 }
 
+// TG推送消息，修复IP查询失败、HTML转义
 async function sendMessage(type, ip, add_data = "") {
-	if (BotToken !== '' && ChatID !== '') {
-		let msg = "";
-		const response = await fetch(`http://ip-api.com/json/${ip}?lang=zh-CN`);
-		if (response.status == 200) {
-			const ipInfo = await response.json();
-			msg = `${type}\nIP: ${ip}\n国家: ${ipInfo.country}\n<tg-spoiler>城市: ${ipInfo.city}\n组织: ${ipInfo.org}\nASN: ${ipInfo.as}\n${add_data}`;
-		} else {
-			msg = `${type}\nIP: ${ip}\n<tg-spoiler>${add_data}`;
-		}
-
-		let url = "https://api.telegram.org/bot" + BotToken + "/sendMessage?chat_id=" + ChatID + "&parse_mode=HTML&text=" + encodeURIComponent(msg);
-		return fetch(url, {
-			method: 'get',
-			headers: {
-				'Accept': 'text/html,application/xhtml+xml,application/xml;',
-				'Accept-Encoding': 'gzip, deflate, br',
-				'User-Agent': 'Mozilla/5.0 Chrome/90.0.4430.72'
-			}
-		});
-	}
-}
-
-function base64Decode(str) {
-	const bytes = new Uint8Array(atob(str).split('').map(c => c.charCodeAt(0)));
-	const decoder = new TextDecoder('utf-8');
-	return decoder.decode(bytes);
-}
-
-async function MD5MD5(text) {
-	const encoder = new TextEncoder();
-
-	const firstPass = await crypto.subtle.digest('MD5', encoder.encode(text));
-	const firstPassArray = Array.from(new Uint8Array(firstPass));
-	const firstHex = firstPassArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-	const secondPass = await crypto.subtle.digest('MD5', encoder.encode(firstHex.slice(7, 27)));
-	const secondPassArray = Array.from(new Uint8Array(secondPass));
-	const secondHex = secondPassArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-	return secondHex.toLowerCase();
-}
-
-function clashFix(content) {
-	if (content.includes('wireguard') && !content.includes('remote-dns-resolve')) {
-		let lines;
-		if (content.includes('\r\n')) {
-			lines = content.split('\r\n');
-		} else {
-			lines = content.split('\n');
-		}
-
-		let result = "";
-		for (let line of lines) {
-			if (line.includes('type: wireguard')) {
-				const 备改内容 = `, mtu: 1280, udp: true`;
-				const 正确内容 = `, mtu: 1280, remote-dns-resolve: true, udp: true`;
-				result += line.replace(new RegExp(备改内容, 'g'), 正确内容) + '\n';
-			} else {
-				result += line + '\n';
-			}
-		}
-
-		content = result;
-	}
-	return content;
-}
-
-async function proxyURL(proxyURL, url) {
-	const URLs = await ADD(proxyURL);
-	const fullURL = URLs[Math.floor(Math.random() * URLs.length)];
-
-	// 解析目标 URL
-	let parsedURL = new URL(fullURL);
-	console.log(parsedURL);
-	// 提取并可能修改 URL 组件
-	let URLProtocol = parsedURL.protocol.slice(0, -1) || 'https';
-	let URLHostname = parsedURL.hostname;
-	let URLPathname = parsedURL.pathname;
-	let URLSearch = parsedURL.search;
-
-	// 处理 pathname
-	if (URLPathname.charAt(URLPathname.length - 1) == '/') {
-		URLPathname = URLPathname.slice(0, -1);
-	}
-	URLPathname += url.pathname;
-
-	// 构建新的 URL
-	let newURL = `${URLProtocol}://${URLHostname}${URLPathname}${URLSearch}`;
-
-	// 反向代理请求
-	let response = await fetch(newURL);
-
-	// 创建新的响应
-	let newResponse = new Response(response.body, {
-		status: response.status,
-		statusText: response.statusText,
-		headers: response.headers
-	});
-
-	// 添加自定义头部，包含 URL 信息
-	//newResponse.headers.set('X-Proxied-By', 'Cloudflare Worker');
-	//newResponse.headers.set('X-Original-URL', fullURL);
-	newResponse.headers.set('X-New-URL', newURL);
-
-	return newResponse;
-}
-
-async function getSUB(api, request, 追加UA, userAgentHeader) {
-	if (!api || api.length === 0) {
-		return [];
-	} else api = [...new Set(api)]; // 去重
-	let newapi = "";
-	let 订阅转换URLs = "";
-	let 异常订阅 = "";
-	const controller = new AbortController(); // 创建一个AbortController实例，用于取消请求
-	const timeout = setTimeout(() => {
-		controller.abort(); // 2秒后取消所有请求
-	}, 2000);
-
+	if (!BotToken || !ChatID) return;
+	let ipInfoText = `IP: ${ip}\n`;
 	try {
-		// 使用Promise.allSettled等待所有API请求完成，无论成功或失败
-		const responses = await Promise.allSettled(api.map(apiUrl => getUrl(request, apiUrl, 追加UA, userAgentHeader).then(response => response.ok ? response.text() : Promise.reject(response))));
-
-		// 遍历所有响应
-		const modifiedResponses = responses.map((response, index) => {
-			// 检查是否请求成功
-			if (response.status === 'rejected') {
-				const reason = response.reason;
-				if (reason && reason.name === 'AbortError') {
-					return {
-						status: '超时',
-						value: null,
-						apiUrl: api[index] // 将原始的apiUrl添加到返回对象中
-					};
-				}
-				console.error(`请求失败: ${api[index]}, 错误信息: ${reason.status} ${reason.statusText}`);
-				return {
-					status: '请求失败',
-					value: null,
-					apiUrl: api[index] // 将原始的apiUrl添加到返回对象中
-				};
-			}
-			return {
-				status: response.status,
-				value: response.value,
-				apiUrl: api[index] // 将原始的apiUrl添加到返回对象中
-			};
-		});
-
-		console.log(modifiedResponses); // 输出修改后的响应数组
-
-		for (const response of modifiedResponses) {
-			// 检查响应状态是否为'fulfilled'
-			if (response.status === 'fulfilled') {
-				const content = await response.value || 'null'; // 获取响应的内容
-				if (content.includes('proxies:')) {
-					//console.log('Clash订阅: ' + response.apiUrl);
-					订阅转换URLs += "|" + response.apiUrl; // Clash 配置
-				} else if (content.includes('outbounds"') && content.includes('inbounds"')) {
-					//console.log('Singbox订阅: ' + response.apiUrl);
-					订阅转换URLs += "|" + response.apiUrl; // Singbox 配置
-				} else if (content.includes('://')) {
-					//console.log('明文订阅: ' + response.apiUrl);
-					newapi += content + '\n'; // 追加内容
-				} else if (isValidBase64(content)) {
-					//console.log('Base64订阅: ' + response.apiUrl);
-					newapi += base64Decode(content) + '\n'; // 解码并追加内容
-				} else {
-					const 异常订阅LINK = `trojan://CMLiussss@127.0.0.1:8888?security=tls&allowInsecure=1&type=tcp&headerType=none#%E5%BC%82%E5%B8%B8%E8%AE%A2%E9%98%85%20${response.apiUrl.split('://')[1].split('/')[0]}`;
-					console.log('异常订阅: ' + 异常订阅LINK);
-					异常订阅 += `${异常订阅LINK}\n`;
-				}
-			}
+		const ipRes = await fetch(`http://ip-api.com/json/${ip}?lang=zh-CN`, { signal: AbortSignal.timeout(2000) });
+		if (ipRes.ok) {
+			const ipJson = await ipRes.json();
+			ipInfoText += `国家: ${ipJson.country || "未知"}\n城市: ${ipJson.city || "未知"}\n运营商: ${ipJson.org || "未知"}\nASN: ${ipJson.as || "未知"}\n`;
 		}
-	} catch (error) {
-		console.error(error); // 捕获并输出错误信息
-	} finally {
-		clearTimeout(timeout); // 清除定时器
-	}
-
-	const 订阅内容 = await ADD(newapi + 异常订阅); // 将处理后的内容转换为数组
-	// 返回处理后的结果
-	return [订阅内容, 订阅转换URLs];
-}
-
-async function getUrl(request, targetUrl, 追加UA, userAgentHeader) {
-	// 设置自定义 User-Agent
-	const newHeaders = new Headers(request.headers);
-	newHeaders.set("User-Agent", `${atob('djJyYXlOLzYuNDU=')} cmliu/CF-Workers-SUB ${追加UA}(${userAgentHeader})`);
-
-	// 构建新的请求对象
-	const modifiedRequest = new Request(targetUrl, {
-		method: request.method,
-		headers: newHeaders,
-		body: request.method === "GET" ? null : request.body,
-		redirect: "follow",
-		cf: {
-			// 忽略SSL证书验证
-			insecureSkipVerify: true,
-			// 允许自签名证书
-			allowUntrusted: true,
-			// 禁用证书验证
-			validateCertificate: false
-		}
+	} catch {}
+	const fullMsg = `${type}\n${ipInfoText}<tg-spoiler>${add_data}</tg-spoiler>`;
+	const tgUrl = `https://api.telegram.org/bot${BotToken}/sendMessage?chat_id=${ChatID}&parse_mode=HTML&text=${encodeURIComponent(fullMsg)}`;
+	return fetch(tgUrl, {
+		method: "GET",
+		headers: {
+			"User-Agent": "CF-Workers-SUB-TG-Push",
+			"Accept": "text/html"
+		},
+		signal: AbortSignal.timeout(3000)
 	});
-
-	// 输出请求的详细信息
-	console.log(`请求URL: ${targetUrl}`);
-	console.log(`请求头: ${JSON.stringify([...newHeaders])}`);
-	console.log(`请求方法: ${request.method}`);
-	console.log(`请求体: ${request.method === "GET" ? null : request.body}`);
-
-	// 发送请求并返回响应
-	return fetch(modifiedRequest);
 }
 
+// 双重MD5签名生成
+async function MD5MD5(text) {
+	const enc = new TextEncoder();
+	const firstHash = await crypto.subtle.digest("MD5", enc.encode(text));
+	const firstHex = Array.from(new Uint8Array(firstHash)).map(b => b.toString(16).padStart(2, "0")).join("");
+	const sliceStr = firstHex.slice(7, 27);
+	const secondHash = await crypto.subtle.digest("MD5", enc.encode(sliceStr));
+	return Array.from(new Uint8Array(secondHash)).map(b => b.toString(16).padStart(2, "0")).join("").toLowerCase();
+}
+
+// Clash Meta Wireguard 节点修复（新版Mihomo强制需要remote-dns-resolve）
+function clashMetaWireguardFix(content) {
+	if (!content.includes("wireguard")) return content;
+	const lines = content.split(/\r?\n/);
+	const output = [];
+	for (const line of lines) {
+		if (line.includes("type: wireguard") && !line.includes("remote-dns-resolve")) {
+			const fixed = line.replace(/,\s*mtu: 1280, udp: true/g, ", mtu: 1280, remote-dns-resolve: true, udp: true");
+			output.push(fixed);
+		} else {
+			output.push(line);
+		}
+	}
+	return output.join("\n");
+}
+
+// 反向代理跳转
+async function proxyURL(proxyRaw, originReqUrl) {
+	const urlList = await ADD(proxyRaw);
+	const targetBase = new URL(urlList[Math.floor(Math.random() * urlList.length)]);
+	let targetPath = targetBase.pathname;
+	if (targetPath.endsWith("/")) targetPath = targetPath.slice(0, -1);
+	const newFullUrl = `${targetBase.protocol}//${targetBase.host}${targetPath}${originReqUrl.pathname}${originReqUrl.search}`;
+	const res = await fetch(newFullUrl);
+	const newHeaders = new Headers(res.headers);
+	newHeaders.set("X-Proxied-Target", newFullUrl);
+	return new Response(res.body, { status: res.status, statusText: res.statusText, headers: newHeaders });
+}
+
+// 批量拉取远程订阅，修复并发超时、内存泄漏、格式识别
+async function getSUB(apiList, req, appendUA, rawUA) {
+	if (!apiList || apiList.length === 0) return [[], ""];
+	const uniqueApis = [...new Set(apiList.map(u => u.trim()).filter(Boolean))];
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), 2500);
+	const fetchTasks = uniqueApis.map(url => getSingleSub(req, url, appendUA, rawUA, controller.signal));
+	const results = await Promise.allSettled(fetchTasks);
+	clearTimeout(timer);
+
+	let plainNodeText = "";
+	let subMergeUrls = "";
+	let errorNodes = "";
+
+	for (const resItem of results) {
+		if (resItem.status !== "fulfilled") continue;
+		const { url, body, ok } = resItem.value;
+		if (!ok) {
+			// 异常订阅生成占位节点，不中断整个订阅
+			const errLink = `trojan://SUBERR@127.0.0.1:9999?security=tls&allowInsecure=1&type=tcp#订阅异常-${new URL(url).hostname}`;
+			errorNodes += errLink + "\n";
+			continue;
+		}
+		// 识别订阅类型
+		if (body.includes("proxies:")) {
+			subMergeUrls += "|" + url;
+		} else if (body.includes('"outbounds"') && body.includes('"inbounds"')) {
+			subMergeUrls += "|" + url;
+		} else if (isValidBase64(body)) {
+			plainNodeText += safeB64Decode(body) + "\n";
+		} else if (body.includes("://")) {
+			plainNodeText += body + "\n";
+		} else {
+			const errLink = `trojan://SUBERR@127.0.0.1:9999?security=tls&allowInsecure=1&type=tcp#未知订阅-${new URL(url).hostname}`;
+			errorNodes += errLink + "\n";
+		}
+	}
+	const finalNodes = await ADD(plainNodeText + errorNodes);
+	return [finalNodes, subMergeUrls];
+}
+
+// 单个订阅拉取请求
+async function getSingleSub(req, targetUrl, appendUA, rawUA, signal) {
+	const newHeaders = new Headers(req.headers);
+	newHeaders.set("User-Agent", `v2rayN/6.45 CF-Workers-SUB-Upgrade ${appendUA}(${rawUA})`);
+	const subReq = new Request(targetUrl, {
+		method: req.method,
+		headers: newHeaders,
+		body: req.method === "GET" ? null : req.body,
+		redirect: "follow",
+		signal,
+		cf: { insecureSkipVerify: true, allowUntrusted: true, validateCertificate: false }
+	});
+	const resp = await fetch(subReq);
+	const body = resp.ok ? await resp.text() : "";
+	return { url: targetUrl, ok: resp.ok, body };
+}
+
+// Base64格式校验
 function isValidBase64(str) {
-	// 先移除所有空白字符(空格、换行、回车等)
-	const cleanStr = str.replace(/\s/g, '');
-	const base64Regex = /^[A-Za-z0-9+/=]+$/;
-	return base64Regex.test(cleanStr);
+	const clean = str.replace(/\s/g, "");
+	return /^[A-Za-z0-9+/=]+$/.test(clean);
 }
 
-async function 迁移地址列表(env, txt = 'ADD.txt') {
-	const 旧数据 = await env.KV.get(`/${txt}`);
-	const 新数据 = await env.KV.get(txt);
+// 安全Base64解码（兼容中文，修复旧版atob乱码）
+function safeB64Decode(b64Str) {
+	try {
+		const raw = atob(b64Str.replace(/\s/g, ""));
+		const buf = Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+		return new TextDecoder("utf-8").decode(buf);
+	} catch (e) {
+		return "";
+	}
+}
 
-	if (旧数据 && !新数据) {
-		// 写入新位置
-		await env.KV.put(txt, 旧数据);
-		// 删除旧数据
-		await env.KV.delete(`/${txt}`);
+// 安全Base64编码兜底（修复原生btoa中文报错）
+function safeB64Encode(text) {
+	const buf = new TextEncoder().encode(text);
+	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	let out = "";
+	for (let i = 0; i < buf.length; i += 3) {
+		const b1 = buf[i];
+		const b2 = buf[i + 1] ?? 0;
+		const b3 = buf[i + 2] ?? 0;
+		out += chars[b1 >> 2];
+		out += chars[((b1 & 3) << 4) | (b2 >> 4)];
+		out += chars[((b2 & 15) << 2) | (b3 >> 6)];
+		out += chars[b3 & 63];
+	}
+	const padLen = (3 - (buf.length % 3)) % 3;
+	return out.slice(0, out.length - padLen) + "=".repeat(padLen);
+}
+
+// KV旧数据迁移兼容
+async function 迁移地址列表(env, txtName = "LINK.txt") {
+	const oldPath = `/${txtName}`;
+	const oldData = await env.KV.get(oldPath);
+	const newData = await env.KV.get(txtName);
+	if (oldData && !newData) {
+		await env.KV.put(txtName, oldData);
+		await env.KV.delete(oldPath);
 		return true;
 	}
 	return false;
 }
 
-async function KV(request, env, txt = 'ADD.txt', guest) {
+// KV在线编辑面板完整逻辑
+async function KV(request, env, txt = "LINK.txt", guest) {
 	const url = new URL(request.url);
-	try {
-		// POST请求处理
-		if (request.method === "POST") {
-			if (!env.KV) return new Response("未绑定KV空间", { status: 400 });
-			try {
-				const content = await request.text();
-				await env.KV.put(txt, content);
-				return new Response("保存成功");
-			} catch (error) {
-				console.error('保存KV时发生错误:', error);
-				return new Response("保存失败: " + error.message, { status: 500 });
-			}
+	// POST保存节点列表
+	if (request.method === "POST") {
+		if (!env.KV) return new Response("未绑定KV命名空间，变量名KV", { status: 400 });
+		try {
+			const content = await request.text();
+			await env.KV.put(txt, content);
+			return new Response("保存成功！");
+		} catch (err) {
+			return new Response(`保存失败: ${err.message}`, { status: 500 });
 		}
-
-		// GET请求部分
-		let content = '';
-		let hasKV = !!env.KV;
-
-		if (hasKV) {
-			try {
-				content = await env.KV.get(txt) || '';
-			} catch (error) {
-				console.error('读取KV时发生错误:', error);
-				content = '读取数据时发生错误: ' + error.message;
-			}
-		}
-
-		const html = `
-			<!DOCTYPE html>
-			<html>
-				<head>
-					<title>${FileName} 订阅编辑</title>
-					<meta charset="utf-8">
-					<meta name="viewport" content="width=device-width, initial-scale=1">
-					<style>
-						body {
-							margin: 0;
-							padding: 15px; /* 调整padding */
-							box-sizing: border-box;
-							font-size: 13px; /* 设置全局字体大小 */
-						}
-						.editor-container {
-							width: 100%;
-							max-width: 100%;
-							margin: 0 auto;
-						}
-						.editor {
-							width: 100%;
-							height: 300px; /* 调整高度 */
-							margin: 15px 0; /* 调整margin */
-							padding: 10px; /* 调整padding */
-							box-sizing: border-box;
-							border: 1px solid #ccc;
-							border-radius: 4px;
-							font-size: 13px;
-							line-height: 1.5;
-							overflow-y: auto;
-							resize: none;
-						}
-						.save-container {
-							margin-top: 8px; /* 调整margin */
-							display: flex;
-							align-items: center;
-							gap: 10px; /* 调整gap */
-						}
-						.save-btn, .back-btn {
-							padding: 6px 15px; /* 调整padding */
-							color: white;
-							border: none;
-							border-radius: 4px;
-							cursor: pointer;
-						}
-						.save-btn {
-							background: #4CAF50;
-						}
-						.save-btn:hover {
-							background: #45a049;
-						}
-						.back-btn {
-							background: #666;
-						}
-						.back-btn:hover {
-							background: #555;
-						}
-						.save-status {
-							color: #666;
-						}
-					</style>
-					<script src="https://cdn.jsdelivr.net/npm/@keeex/qrcodejs-kx@1.0.2/qrcode.min.js"></script>
-				</head>
-				<body>
-					################################################################<br>
-					Subscribe / sub 订阅地址, 点击链接自动 <strong>复制订阅链接</strong> 并 <strong>生成订阅二维码</strong> <br>
-					---------------------------------------------------------------<br>
-					自适应订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?sub','qrcode_0')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}</a><br>
-					<div id="qrcode_0" style="margin: 10px 10px 10px 10px;"></div>
-					Base64订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?b64','qrcode_1')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?b64</a><br>
-					<div id="qrcode_1" style="margin: 10px 10px 10px 10px;"></div>
-					clash订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?clash','qrcode_2')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?clash</a><br>
-					<div id="qrcode_2" style="margin: 10px 10px 10px 10px;"></div>
-					singbox订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?sb','qrcode_3')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?sb</a><br>
-					<div id="qrcode_3" style="margin: 10px 10px 10px 10px;"></div>
-					surge订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?surge','qrcode_4')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?surge</a><br>
-					<div id="qrcode_4" style="margin: 10px 10px 10px 10px;"></div>
-					loon订阅地址:<br>
-					<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/${mytoken}?loon','qrcode_5')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/${mytoken}?loon</a><br>
-					<div id="qrcode_5" style="margin: 10px 10px 10px 10px;"></div>
-					&nbsp;&nbsp;<strong><a href="javascript:void(0);" id="noticeToggle" onclick="toggleNotice()">查看访客订阅∨</a></strong><br>
-					<div id="noticeContent" class="notice-content" style="display: none;">
-						---------------------------------------------------------------<br>
-						访客订阅只能使用订阅功能，无法查看配置页！<br>
-						GUEST（访客订阅TOKEN）: <strong>${guest}</strong><br>
-						---------------------------------------------------------------<br>
-						自适应订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}','guest_0')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}</a><br>
-						<div id="guest_0" style="margin: 10px 10px 10px 10px;"></div>
-						Base64订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&b64','guest_1')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&b64</a><br>
-						<div id="guest_1" style="margin: 10px 10px 10px 10px;"></div>
-						clash订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&clash','guest_2')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&clash</a><br>
-						<div id="guest_2" style="margin: 10px 10px 10px 10px;"></div>
-						singbox订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&sb','guest_3')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&sb</a><br>
-						<div id="guest_3" style="margin: 10px 10px 10px 10px;"></div>
-						surge订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&surge','guest_4')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&surge</a><br>
-						<div id="guest_4" style="margin: 10px 10px 10px 10px;"></div>
-						loon订阅地址:<br>
-						<a href="javascript:void(0)" onclick="copyToClipboard('https://${url.hostname}/sub?token=${guest}&loon','guest_5')" style="color:blue;text-decoration:underline;cursor:pointer;">https://${url.hostname}/sub?token=${guest}&loon</a><br>
-						<div id="guest_5" style="margin: 10px 10px 10px 10px;"></div>
-					</div>
-					---------------------------------------------------------------<br>
-					################################################################<br>
-					订阅转换配置<br>
-					---------------------------------------------------------------<br>
-					SUBAPI（订阅转换后端）: <strong>${subProtocol}://${subConverter}</strong><br>
-					SUBCONFIG（订阅转换配置文件）: <strong>${subConfig}</strong><br>
-					---------------------------------------------------------------<br>
-					################################################################<br>
-					${FileName} 汇聚订阅编辑: 
-					<div class="editor-container">
-						${hasKV ? `
-						<textarea class="editor" 
-							placeholder="${decodeURIComponent(atob('TElOSyVFNyVBNCVCQSVFNCVCRSU4QiVFRiVCQyU4OCVFNCVCOCU4MCVFOCVBMSU4QyVFNCVCOCU4MCVFNCVCOCVBQSVFOCU4QSU4MiVFNyU4MiVCOSVFOSU5MyVCRSVFNiU4RSVBNSVFNSU4RCVCMyVFNSU4RiVBRiVFRiVCQyU4OSVFRiVCQyU5QQp2bGVzcyUzQSUyRiUyRjI0NmFhNzk1LTA2MzctNGY0Yy04ZjY0LTJjOGZiMjRjMWJhZCU0MDEyNy4wLjAuMSUzQTEyMzQlM0ZlbmNyeXB0aW9uJTNEbm9uZSUyNnNlY3VyaXR5JTNEdGxzJTI2c25pJTNEVEcuQ01MaXVzc3NzLmxvc2V5b3VyaXAuY29tJTI2YWxsb3dJbnNlY3VyZSUzRDElMjZ0eXBlJTNEd3MlMjZob3N0JTNEVEcuQ01MaXVzc3NzLmxvc2V5b3VyaXAuY29tJTI2cGF0aCUzRCUyNTJGJTI1M0ZlZCUyNTNEMjU2MCUyM0NGbmF0CnRyb2phbiUzQSUyRiUyRmFhNmRkZDJmLWQxY2YtNGE1Mi1iYTFiLTI2NDBjNDFhNzg1NiU0MDIxOC4xOTAuMjMwLjIwNyUzQTQxMjg4JTNGc2VjdXJpdHklM0R0bHMlMjZzbmklM0RoazEyLmJpbGliaWxpLmNvbSUyNmFsbG93SW5zZWN1cmUlM0QxJTI2dHlwZSUzRHRjcCUyNmhlYWRlclR5cGUlM0Rub25lJTIzSEsKc3MlM0ElMkYlMkZZMmhoWTJoaE1qQXRhV1YwWmkxd2IyeDVNVE13TlRveVJYUlFjVzQyU0ZscVZVNWpTRzlvVEdaVmNFWlJkMjVtYWtORFVUVnRhREZ0U21SRlRVTkNkV04xVjFvNVVERjFaR3RTUzBodVZuaDFielUxYXpGTFdIb3lSbTgyYW5KbmRERTRWelkyYjNCMGVURmxOR0p0TVdwNlprTm1RbUklMjUzRCU0MDg0LjE5LjMxLjYzJTNBNTA4NDElMjNERQoKCiVFOCVBRSVBMiVFOSU5OCU4NSVFOSU5MyVCRSVFNiU4RSVBNSVFNyVBNCVCQSVFNCVCRSU4QiVFRiVCQyU4OCVFNCVCOCU4MCVFOCVBMSU4QyVFNCVCOCU4MCVFNiU5RCVBMSVFOCVBRSVBMiVFOSU5OCU4NSVFOSU5MyVCRSVFNiU4RSVBNSVFNSU4RCVCMyVFNSU4RiVBRiVFRiVCQyU4OSVFRiVCQyU5QQpodHRwcyUzQSUyRiUyRnN1Yi54Zi5mcmVlLmhyJTJGYXV0bw=='))}"
-							id="content">${content}</textarea>
-						<div class="save-container">
-							<button class="save-btn" onclick="saveContent(this)">保存</button>
-							<span class="save-status" id="saveStatus"></span>
-						</div>
-						` : '<p>请绑定 <strong>变量名称</strong> 为 <strong>KV</strong> 的KV命名空间</p>'}
-					</div>
-					<br>
-					################################################################<br>
-					${decodeURIComponent(atob('dGVsZWdyYW0lMjAlRTQlQkElQTQlRTYlQjUlODElRTclQkUlQTQlMjAlRTYlOEElODAlRTYlOUMlQUYlRTUlQTQlQTclRTQlQkQlQUMlN0UlRTUlOUMlQTglRTclQkElQkYlRTUlOEYlOTElRTclODklOEMhJTNDYnIlM0UKJTNDYSUyMGhyZWYlM0QlMjdodHRwcyUzQSUyRiUyRnQubWUlMkZDTUxpdXNzc3MlMjclM0VodHRwcyUzQSUyRiUyRnQubWUlMkZDTUxpdXNzc3MlM0MlMkZhJTNFJTNDYnIlM0UKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tJTNDYnIlM0UKZ2l0aHViJTIwJUU5JUExJUI5JUU3JTlCJUFFJUU1JTlDJUIwJUU1JTlEJTgwJTIwU3RhciFTdGFyIVN0YXIhISElM0NiciUzRQolM0NhJTIwaHJlZiUzRCUyN2h0dHBzJTNBJTJGJTJGZ2l0aHViLmNvbSUyRmNtbGl1JTJGQ0YtV29ya2Vycy1TVUIlMjclM0VodHRwcyUzQSUyRiUyRmdpdGh1Yi5jb20lMkZjbWxpdSUyRkNGLVdvcmtlcnMtU1VCJTNDJTJGYSUzRSUzQ2JyJTNFCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSUzQ2JyJTNFCiUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMyUyMw=='))}
-					<br><br>UA: <strong>${request.headers.get('User-Agent')}</strong>
-					<script>
-					function copyToClipboard(text, qrcode) {
-						navigator.clipboard.writeText(text).then(() => {
-							alert('已复制到剪贴板');
-						}).catch(err => {
-							console.error('复制失败:', err);
-						});
-						const qrcodeDiv = document.getElementById(qrcode);
-						qrcodeDiv.innerHTML = '';
-						new QRCode(qrcodeDiv, {
-							text: text,
-							width: 220, // 调整宽度
-							height: 220, // 调整高度
-							colorDark: "#000000", // 二维码颜色
-							colorLight: "#ffffff", // 背景颜色
-							correctLevel: QRCode.CorrectLevel.Q, // 设置纠错级别
-							scale: 1 // 调整像素颗粒度
-						});
-					}
-						
-					if (document.querySelector('.editor')) {
-						let timer;
-						const textarea = document.getElementById('content');
-						const originalContent = textarea.value;
-		
-						function goBack() {
-							const currentUrl = window.location.href;
-							const parentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-							window.location.href = parentUrl;
-						}
-		
-						function replaceFullwidthColon() {
-							const text = textarea.value;
-							textarea.value = text.replace(/：/g, ':');
-						}
-						
-						function saveContent(button) {
-							try {
-								const updateButtonText = (step) => {
-									button.textContent = \`保存中: \${step}\`;
-								};
-								// 检测是否为iOS设备
-								const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-								
-								// 仅在非iOS设备上执行replaceFullwidthColon
-								if (!isIOS) {
-									replaceFullwidthColon();
-								}
-								updateButtonText('开始保存');
-								button.disabled = true;
-
-								// 获取textarea内容和原始内容
-								const textarea = document.getElementById('content');
-								if (!textarea) {
-									throw new Error('找不到文本编辑区域');
-								}
-
-								updateButtonText('获取内容');
-								let newContent;
-								let originalContent;
-								try {
-									newContent = textarea.value || '';
-									originalContent = textarea.defaultValue || '';
-								} catch (e) {
-									console.error('获取内容错误:', e);
-									throw new Error('无法获取编辑内容');
-								}
-
-								updateButtonText('准备状态更新函数');
-								const updateStatus = (message, isError = false) => {
-									const statusElem = document.getElementById('saveStatus');
-									if (statusElem) {
-										statusElem.textContent = message;
-										statusElem.style.color = isError ? 'red' : '#666';
-									}
-								};
-
-								updateButtonText('准备按钮重置函数');
-								const resetButton = () => {
-									button.textContent = '保存';
-									button.disabled = false;
-								};
-
-								if (newContent !== originalContent) {
-									updateButtonText('发送保存请求');
-									fetch(window.location.href, {
-										method: 'POST',
-										body: newContent,
-										headers: {
-											'Content-Type': 'text/plain;charset=UTF-8'
-										},
-										cache: 'no-cache'
-									})
-									.then(response => {
-										updateButtonText('检查响应状态');
-										if (!response.ok) {
-											throw new Error(\`HTTP error! status: \${response.status}\`);
-										}
-										updateButtonText('更新保存状态');
-										const now = new Date().toLocaleString();
-										document.title = \`编辑已保存 \${now}\`;
-										updateStatus(\`已保存 \${now}\`);
-									})
-									.catch(error => {
-										updateButtonText('处理错误');
-										console.error('Save error:', error);
-										updateStatus(\`保存失败: \${error.message}\`, true);
-									})
-									.finally(() => {
-										resetButton();
-									});
-								} else {
-									updateButtonText('检查内容变化');
-									updateStatus('内容未变化');
-									resetButton();
-								}
-							} catch (error) {
-								console.error('保存过程出错:', error);
-								button.textContent = '保存';
-								button.disabled = false;
-								const statusElem = document.getElementById('saveStatus');
-								if (statusElem) {
-									statusElem.textContent = \`错误: \${error.message}\`;
-									statusElem.style.color = 'red';
-								}
-							}
-						}
-		
-						textarea.addEventListener('blur', saveContent);
-						textarea.addEventListener('input', () => {
-							clearTimeout(timer);
-							timer = setTimeout(saveContent, 5000);
-						});
-					}
-
-					function toggleNotice() {
-						const noticeContent = document.getElementById('noticeContent');
-						const noticeToggle = document.getElementById('noticeToggle');
-						if (noticeContent.style.display === 'none' || noticeContent.style.display === '') {
-							noticeContent.style.display = 'block';
-							noticeToggle.textContent = '隐藏访客订阅∧';
-						} else {
-							noticeContent.style.display = 'none';
-							noticeToggle.textContent = '查看访客订阅∨';
-						}
-					}
-			
-					// 初始化 noticeContent 的 display 属性
-					document.addEventListener('DOMContentLoaded', () => {
-						document.getElementById('noticeContent').style.display = 'none';
-					});
-					</script>
-				</body>
-			</html>
-		`;
-
-		return new Response(html, {
-			headers: { "Content-Type": "text/html;charset=utf-8" }
-		});
-	} catch (error) {
-		console.error('处理请求时发生错误:', error);
-		return new Response("服务器错误: " + error.message, {
-			status: 500,
-			headers: { "Content-Type": "text/plain;charset=utf-8" }
-		});
 	}
+	// GET渲染管理页面
+	let kvContent = "";
+	let hasKV = !!env.KV;
+	if (hasKV) {
+		try {
+			kvContent = await env.KV.get(txt) || "";
+		} catch (e) {
+			kvContent = `KV读取失败：${e.message}`;
+		}
+	}
+	const html = `
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${FileName} 订阅管理面板</title>
+<script src="https://cdn.jsdelivr.net/npm/@keeex/qrcodejs-kx@1.0.2/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{padding:16px;font-family:system-ui, sans-serif;font-size:14px;line-height:1.6;}
+.block{margin:16px 0;padding:12px;border:1px solid #eee;border-radius:8px;}
+h3{margin-bottom:10px;color:#222;}
+a{color:#0066cc;text-decoration:underline;cursor:pointer;}
+textarea{width:100%;min-height:320px;padding:10px;border:1px solid #ccc;border-radius:6px;margin:10px 0;font-family:monospace;font-size:13px;}
+.btns{display:flex;gap:12px;align-items:center;margin:8px 0;}
+button{padding:6px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;}
+.save{background:#28a745;color:#fff;}
+.save:disabled{opacity:0.6;cursor:not-allowed;}
+.back{background:#6c757d;color:#fff;}
+.tip{color:#666;margin:4px 0;}
+.qr-box{margin:8px 0;}
+.guest-box{margin-top:10px;padding:10px;background:#f8f9fa;border-radius:6px;}
+</style>
+</head>
+<body>
+<div class="block">
+<h3>主订阅链接（管理员）</h3>
+<div class="tip">自适应订阅：<a onclick="copyQr('https://${url.hostname}/${mytoken}','qr0')">https://${url.hostname}/${mytoken}</a></div>
+<div id="qr0" class="qr-box"></div>
+<div class="tip">Base64订阅：<a onclick="copyQr('https://${url.hostname}/${mytoken}?b64','qr1')">https://${url.hostname}/${mytoken}?b64</a></div>
+<div id="qr1" class="qr-box"></div>
+<div class="tip">Mihomo/Clash：<a onclick="copyQr('https://${url.hostname}/${mytoken}?clash','qr2')">https://${url.hostname}/${mytoken}?clash</a></div>
+<div id="qr2" class="qr-box"></div>
+<div class="tip">Sing-box新版：<a onclick="copyQr('https://${url.hostname}/${mytoken}?sb','qr3')">https://${url.hostname}/${mytoken}?sb</a></div>
+<div id="qr3" class="qr-box"></div>
+<div class="tip">Surge：<a onclick="copyQr('https://${url.hostname}/${mytoken}?surge','qr4')">https://${url.hostname}/${mytoken}?surge</a></div>
+<div id="qr4" class="qr-box"></div>
+<div class="tip">Loon：<a onclick="copyQr('https://${url.hostname}/${mytoken}?loon','qr5')">https://${url.hostname}/${mytoken}?loon</a></div>
+<div id="qr5" class="qr-box"></div>
+</div>
+
+<div class="block guest-box">
+<h3>访客订阅（仅读取，无编辑权限）</h3>
+<div class="tip">访客Token：<strong>${guest}</strong></div>
+<div class="tip">自适应：<a onclick="copyQr('https://${url.hostname}/sub?token=${guest}','g0')">https://${url.hostname}/sub?token=${guest}</a></div>
+<div id="g0" class="qr-box"></div>
+<div class="tip">Mihomo：<a onclick="copyQr('https://${url.hostname}/sub?token=${guest}&clash','g1')">https://${url.hostname}/sub?token=${guest}&clash</a></div>
+<div id="g1" class="qr-box"></div>
+<div class="tip">Sing-box：<a onclick="copyQr('https://${url.hostname}/sub?token=${guest}&sb','g2')">https://${url.hostname}/sub?token=${guest}&sb</a></div>
+<div id="g2" class="qr-box"></div>
+</div>
+
+<div class="block">
+<h3>节点列表编辑（一行一个节点/远程订阅链接）</h3>
+${hasKV ? \`
+<textarea id="nodeText">${kvContent}</textarea>
+<div class="btns">
+<button class="save" id="saveBtn" onclick="saveNodes()">保存配置</button>
+<button class="back" onclick="history.back()">返回</button>
+<span id="saveTip" class="tip"></span>
+</div>
+<p class="tip">支持vless/vmess/trojan/ss/ssr/wireguard明文节点、http远程订阅链接</p>
+\` : "<p>请在Worker变量绑定命名空间：变量名 KV</p>"}
+</div>
+
+<div class="block">
+<h3>当前配置信息</h3>
+<div class="tip">转换后端：${subProtocol}://${subConverter}</div>
+<div class="tip">转换配置模板：${subConfig}</div>
+<div class="tip">订阅更新间隔：${SUBUpdateTime} 小时</div>
+</div>
+
+<script>
+// 复制链接并生成二维码
+function copyQr(link, qrid){
+	navigator.clipboard.writeText(link).then(()=>alert("链接已复制！"));
+	const box = document.getElementById(qrid);
+	box.innerHTML = "";
+	new QRCode(box, {text:link, width:180, height:180, correctLevel:QRCode.CorrectLevel.M});
+}
+
+// 保存节点列表
+async function saveNodes(){
+	const btn = document.getElementById("saveBtn");
+	const tip = document.getElementById("saveTip");
+	const text = document.getElementById("nodeText").value;
+	btn.disabled = true;
+	btn.innerText = "保存中...";
+	tip.innerText = "";
+	try{
+		const res = await fetch(window.location.href, {
+			method:"POST",
+			body:text,
+			headers:{"Content-Type":"text/plain;charset=utf-8"}
+		});
+		const msg = await res.text();
+		tip.style.color = "#28a745";
+		tip.innerText = "✅ " + msg + " " + new Date().toLocaleString();
+		document.title = "已保存 - ${FileName}";
+	}catch(err){
+		tip.style.color = "#dc3545";
+		tip.innerText = "❌ 保存失败：" + err.message;
+	}finally{
+		btn.disabled = false;
+		btn.innerText = "保存配置";
+	}
+}
+</script>
+</body>
+</html>`;
+	return new Response(html, { headers: { "Content-Type": "text/html;charset=utf-8" } });
 }
