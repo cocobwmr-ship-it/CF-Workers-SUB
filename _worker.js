@@ -150,7 +150,7 @@ export default {
 		// URL参数强制格式优先级最高
 		if (url.searchParams.has('b64') || url.searchParams.has('base64')) 订阅格式 = 'base64';
 		else if (forceMihomo) 追加UA = 'clashmeta';
-		else if (forceSingBox) 追加UA = 'singbox-v1.8';
+		else if (forceSingBox) 追加UA = 'singbox-v1.11.4';
 		else if (forceSurge) 追加UA = 'surge';
 		else if (forceQuanX) 追加UA = 'Quantumult%20X';
 		else if (forceLoon) 追加UA = 'Loon';
@@ -249,7 +249,7 @@ export default {
 			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
 		} else if (订阅格式 === 'singbox') {
 			baseConvertQuery.set("target", "singbox");
-			baseConvertQuery.set("version", "1.8");
+			baseConvertQuery.set("version", "1.11.4");
 			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
 		} else if (订阅格式 === 'surge') {
 			baseConvertQuery.set("target", "surge");
