@@ -272,30 +272,28 @@ export default {
 			});
 			if (!convertRes.ok) throw new Error("转换服务异常");
 			let convertContent = await convertRes.text();
-			// Sing-box 兼容修复
+// Sing-box VLESS 兼容修复
+// 某些转换器会把 VLESS 的 ML-KEM encryption 参数直接写入 outbound，
+// 但当前 sing-box VLESS outbound 不支持该字段。
 if (订阅格式 === 'singbox') {
 	try {
 		const config = JSON.parse(convertContent);
 
 		if (Array.isArray(config.outbounds)) {
 			for (const outbound of config.outbounds) {
-				if (!outbound || typeof outbound !== 'object') continue;
-
-				// 修复新版 Sing-box 不支持的 encryption 字段
-				if ([
-					'vless',
-					'vmess',
-					'trojan',
-					'shadowsocks'
-				].includes(outbound.type)) {
+				if (
+					outbound &&
+					outbound.type === 'vless' &&
+					typeof outbound.encryption === 'string'
+				) {
 					delete outbound.encryption;
 				}
 			}
 		}
 
-		convertContent = JSON.stringify(config, null, 2);
+		convertContent = JSON.stringify(config);
 	} catch (e) {
-		console.log("Sing-box兼容修复失败:", e.message);
+		console.log('Sing-box VLESS兼容修复失败:', e.message);
 	}
 }
 			// 修复Mihomo wireguard节点缺失dns参数（核心兼容修复）
