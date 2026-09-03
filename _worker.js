@@ -285,259 +285,235 @@ if (订阅格式 === 'singbox') {
 			const dns = config.dns;
 
 			// ---------- DNS Servers ----------
-			if (Array.isArray(dns.servers)) {
-				dns.servers = dns.servers.map(server => {
-					if (!server || typeof server !== 'object') {
-						return server;
-					}
+// =========================================================
+// Sing-box 1.14+ DNS 兼容修复
+// 只转换旧 DNS 格式，不启用 FakeIP
+// =========================================================
+if (config.dns) {
+    const dns = config.dns;
 
-					// 已经是新版 DNS server，直接保留
-					if (typeof server.type === 'string') {
-						return server;
-					}
+    // ---------- DNS Servers ----------
+    if (Array.isArray(dns.servers)) {
+        dns.servers = dns.servers.map(server => {
+            if (!server || typeof server !== 'object') {
+                return server;
+            }
 
-					const address = server.address;
-					const newServer = {
-						tag: server.tag
-					};
+            // 已经是新版 DNS server
+            if (typeof server.type === 'string') {
+                return server;
+            }
 
-					// 保留 address_resolver -> domain_resolver
-					if (server.address_resolver) {
-						newServer.domain_resolver = server.address_resolver;
-					}
+            const address = server.address;
+            const newServer = {};
 
-					// 保留 detour
-					if (server.detour) {
-						newServer.detour = server.detour;
-					}
+            if (server.tag) {
+                newServer.tag = server.tag;
+            }
 
-					// -------------------------------------------------
-					// fakeip
-					// 旧：
-					// {
-					//   "tag": "dns_fakeip",
-					//   "address": "fakeip"
-					// }
-					// 新：
-					// {
-					//   "type": "fakeip",
-					//   "tag": "dns_fakeip",
-					//   "inet4_range": "198.18.0.0/15",
-					//   "inet6_range": "fc00::/18"
-					// }
-					// -------------------------------------------------
-					if (address === 'fakeip') {
-						newServer.type = 'fakeip';
+            // address_resolver -> domain_resolver
+            if (server.address_resolver) {
+                newServer.domain_resolver = server.address_resolver;
+            }
 
-						const oldFakeIP = dns.fakeip || {};
+            // detour 保留
+            if (server.detour) {
+                newServer.detour = server.detour;
+            }
 
-						newServer.inet4_range =
-							oldFakeIP.inet4_range || '198.18.0.0/15';
+            // -------------------------------------------------
+            // 旧 FakeIP：
+            // address: "fakeip"
+            //
+            // 这里故意不转换成新版 FakeIP。
+            // 避免客户端拿到 198.18.x.x 后直接连接假 IP。
+            // -------------------------------------------------
+            if (address === 'fakeip') {
+                return null;
+            }
 
-						newServer.inet6_range =
-							oldFakeIP.inet6_range || 'fc00::/18';
+            // -------------------------------------------------
+            // rcode://xxx
+            //
+            // 旧 DNS server 不能继续使用。
+            // 后面 DNS rule 单独处理。
+            // -------------------------------------------------
+            if (
+                typeof address === 'string' &&
+                address.startsWith('rcode://')
+            ) {
+                return null;
+            }
 
-						return newServer;
-					}
+            // TLS
+            if (
+                typeof address === 'string' &&
+                address.startsWith('tls://')
+            ) {
+                const value = address.substring(6);
+                const host = value.split('/')[0];
+                const hostPort = host.split(':');
 
-					// -------------------------------------------------
-					// rcode://success
-					// 这个旧 DNS server 本身不能继续存在于 1.14+
-					// 后面 DNS rule 会直接转换成 predefined action
-					// -------------------------------------------------
-					if (
-						typeof address === 'string' &&
-						address.startsWith('rcode://')
-					) {
-						return null;
-					}
+                newServer.type = 'tls';
+                newServer.server = hostPort[0];
+                newServer.server_port =
+                    hostPort[1] ? Number(hostPort[1]) : 853;
 
-					// -------------------------------------------------
-					// tls://1.1.1.1
-					// -------------------------------------------------
-					if (
-						typeof address === 'string' &&
-						address.startsWith('tls://')
-					) {
-						const value = address.substring(6);
-						const parts = value.split('/')[0];
-						const hostPort = parts.split(':');
+                return newServer;
+            }
 
-						newServer.type = 'tls';
-						newServer.server = hostPort[0];
-						newServer.server_port = hostPort[1]
-							? Number(hostPort[1])
-							: 853;
+            // HTTP3
+            if (
+                typeof address === 'string' &&
+                address.startsWith('h3://')
+            ) {
+                const value = address.substring(5);
+                const slashIndex = value.indexOf('/');
 
-						return newServer;
-					}
+                let host;
+                let path;
 
-					// -------------------------------------------------
-					// h3://dns.alidns.com/dns-query
-					// -------------------------------------------------
-					if (
-						typeof address === 'string' &&
-						address.startsWith('h3://')
-					) {
-						const value = address.substring(5);
+                if (slashIndex === -1) {
+                    host = value;
+                    path = '/dns-query';
+                } else {
+                    host = value.substring(0, slashIndex);
+                    path = value.substring(slashIndex) || '/dns-query';
+                }
 
-						const slashIndex = value.indexOf('/');
+                const hostPort = host.split(':');
 
-						let host;
-						let path;
+                newServer.type = 'h3';
+                newServer.server = hostPort[0];
+                newServer.server_port =
+                    hostPort[1] ? Number(hostPort[1]) : 443;
+                newServer.path = path;
 
-						if (slashIndex === -1) {
-							host = value;
-							path = '/dns-query';
-						} else {
-							host = value.substring(0, slashIndex);
-							path = value.substring(slashIndex) || '/dns-query';
-						}
+                return newServer;
+            }
 
-						const hostPort = host.split(':');
+            // UDP
+            if (
+                typeof address === 'string' &&
+                address.startsWith('udp://')
+            ) {
+                const value = address.substring(6);
+                const hostPort = value.split(':');
 
-						newServer.type = 'h3';
-						newServer.server = hostPort[0];
-						newServer.server_port = hostPort[1]
-							? Number(hostPort[1])
-							: 443;
-						newServer.path = path;
+                newServer.type = 'udp';
+                newServer.server = hostPort[0];
+                newServer.server_port =
+                    hostPort[1] ? Number(hostPort[1]) : 53;
 
-						return newServer;
-					}
+                return newServer;
+            }
 
-					// -------------------------------------------------
-					// udp://8.8.8.8
-					// -------------------------------------------------
-					if (
-						typeof address === 'string' &&
-						address.startsWith('udp://')
-					) {
-						const value = address.substring(6);
-						const hostPort = value.split(':');
+            // TCP
+            if (
+                typeof address === 'string' &&
+                address.startsWith('tcp://')
+            ) {
+                const value = address.substring(6);
+                const hostPort = value.split(':');
 
-						newServer.type = 'udp';
-						newServer.server = hostPort[0];
-						newServer.server_port = hostPort[1]
-							? Number(hostPort[1])
-							: 53;
+                newServer.type = 'tcp';
+                newServer.server = hostPort[0];
+                newServer.server_port =
+                    hostPort[1] ? Number(hostPort[1]) : 53;
 
-						return newServer;
-					}
+                return newServer;
+            }
 
-					// -------------------------------------------------
-					// tcp://8.8.8.8
-					// -------------------------------------------------
-					if (
-						typeof address === 'string' &&
-						address.startsWith('tcp://')
-					) {
-						const value = address.substring(6);
-						const hostPort = value.split(':');
+            // 普通 IP
+            if (
+                typeof address === 'string' &&
+                (
+                    /^\d{1,3}(\.\d{1,3}){3}$/.test(address) ||
+                    address.includes(':')
+                )
+            ) {
+                newServer.type = 'udp';
+                newServer.server = address;
+                newServer.server_port = 53;
 
-						newServer.type = 'tcp';
-						newServer.server = hostPort[0];
-						newServer.server_port = hostPort[1]
-							? Number(hostPort[1])
-							: 53;
+                return newServer;
+            }
 
-						return newServer;
-					}
+            // 未知格式，原样保留
+            return server;
 
-					// -------------------------------------------------
-					// 普通 IP，例如：
-					// 223.5.5.5
-					// -------------------------------------------------
-					if (
-						typeof address === 'string' &&
-						(
-							/^\d{1,3}(\.\d{1,3}){3}$/.test(address) ||
-							address.includes(':')
-						)
-					) {
-						newServer.type = 'udp';
-						newServer.server = address;
-						newServer.server_port = 53;
+        }).filter(Boolean);
+    }
 
-						return newServer;
-					}
+    // =========================================================
+    // 删除旧版 FakeIP 配置
+    // =========================================================
+    if (dns.fakeip) {
+        delete dns.fakeip;
+    }
 
-					// -------------------------------------------------
-					// 其他未知旧格式
-					// 尽量保留原对象，避免误删转换器字段
-					// -------------------------------------------------
-					return server;
-				}).filter(Boolean);
-			}
+    // =========================================================
+    // DNS Rules
+    // =========================================================
+    if (Array.isArray(dns.rules)) {
+        dns.rules = dns.rules
+            .filter(rule => {
+                if (!rule || typeof rule !== 'object') {
+                    return false;
+                }
 
-			// 删除 1.14+ 已移除的旧版 fakeip 配置
-			if (dns.fakeip) {
-				delete dns.fakeip;
-			}
+                // 删除所有 FakeIP 规则
+                if (rule.server === 'dns_fakeip') {
+                    return false;
+                }
 
-			// ---------- DNS Rules ----------
-			if (Array.isArray(dns.rules)) {
-				dns.rules = dns.rules.map(rule => {
-					if (!rule || typeof rule !== 'object') {
-						return rule;
-					}
+                if (
+                    rule.action === 'route' &&
+                    rule.server === 'dns_fakeip'
+                ) {
+                    return false;
+                }
 
-					// 已经是新版 action 格式
-					if (rule.action) {
-						return rule;
-					}
+                return true;
+            })
+            .map(rule => {
 
-					const newRule = { ...rule };
+                // 已经是新版 action
+                if (rule.action) {
+                    return rule;
+                }
 
-					// -------------------------------------------------
-					// 旧：
-					// "server": "dns_resolver"
-					//
-					// 新：
-					// "action": "route",
-					// "server": "dns_resolver"
-					// -------------------------------------------------
-					if (typeof rule.server === 'string') {
-						const serverTag = rule.server;
+                const newRule = { ...rule };
 
-						delete newRule.server;
+                if (typeof rule.server === 'string') {
+                    const serverTag = rule.server;
 
-						// dns_block / block 原本通常对应
-						// rcode://success
-						if (
-							serverTag === 'dns_block' ||
-							serverTag === 'block'
-						) {
-							newRule.action = 'predefined';
-							newRule.rcode = 'NOERROR';
-						} else {
-							newRule.action = 'route';
-							newRule.server = serverTag;
-						}
-					}
+                    delete newRule.server;
 
-					// 旧版 outbound 匹配项在新 DNS rule 中已经不推荐，
-					// 但保留其他匹配条件，避免影响原来的规则逻辑
-					return newRule;
-				});
-			}
+                    // 旧 block / dns_block
+                    if (
+                        serverTag === 'dns_block' ||
+                        serverTag === 'block'
+                    ) {
+                        newRule.action = 'predefined';
+                        newRule.rcode = 'NOERROR';
+                    } else {
+                        newRule.action = 'route';
+                        newRule.server = serverTag;
+                    }
+                }
 
-			// 清理已经不存在的旧 DNS block server 引用
-			if (Array.isArray(dns.servers)) {
-				dns.servers = dns.servers.filter(server => {
-					if (!server || typeof server !== 'object') {
-						return true;
-					}
+                return newRule;
+            });
+    }
 
-					return server.tag !== 'block';
-				});
-			}
+    // 删除旧 independent_cache
+    if ('independent_cache' in dns) {
+        delete dns.independent_cache;
+    }
 
-			// independent_cache 在新版中已经不是必须配置，
-			// 删除可以避免新版兼容性问题
-			if ('independent_cache' in dns) {
-				delete dns.independent_cache;
-			}
+    config.dns = dns;
+}
 
 			config.dns = dns;
 		}
