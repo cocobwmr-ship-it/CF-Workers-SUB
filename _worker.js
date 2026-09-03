@@ -249,7 +249,7 @@ export default {
 			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
 		} else if (订阅格式 === 'singbox') {
 			baseConvertQuery.set("target", "singbox");
-			baseConvertQuery.set("version", "1.11.4");
+			baseConvertQuery.set("version", "1.14.0");
 			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
 		} else if (订阅格式 === 'surge') {
 			baseConvertQuery.set("target", "surge");
