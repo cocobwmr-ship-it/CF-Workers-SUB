@@ -248,286 +248,197 @@ export default {
 			baseConvertQuery.set("target", "clashmeta");
 			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
 		} else if (订阅格式 === 'singbox') {
-			baseConvertQuery.set("target", "singbox");
-			baseConvertQuery.set("version", "1.14.0");
-			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
-		} else if (订阅格式 === 'surge') {
-			baseConvertQuery.set("target", "surge");
-			baseConvertQuery.set("ver", "4");
-			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
-		} else if (订阅格式 === 'quanx') {
-			baseConvertQuery.set("target", "quanx");
-			baseConvertQuery.set("udp", "true");
-			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
-		} else if (订阅格式 === 'loon') {
-			baseConvertQuery.set("target", "loon");
-			subConverterUrl = `${subProtocol}://${subConverter}/sub?${baseConvertQuery.toString()}`;
-		}
+    try {
+        const config = JSON.parse(convertContent);
 
-		// 请求转换后端，失败自动降级base64
-		try {
-			const convertRes = await fetch(subConverterUrl, {
-				headers: { 'User-Agent': userAgentHeader },
-				signal: AbortSignal.timeout(4000)
-			});
-			if (!convertRes.ok) throw new Error("转换服务异常");
-			// Sing-box 1.14+ 兼容修复
-if (订阅格式 === 'singbox') {
-	try {
-		const config = JSON.parse(convertContent);
+        // ================================
+        // sing-box 1.14+ DNS compatibility
+        // ================================
+        if (config.dns && typeof config.dns === 'object') {
 
-		// =========================================================
-```js
-// =========================================================
-// Sing-box 1.14+ DNS 兼容修复
-// 注意：不启用 FakeIP，彻底移除旧版 FakeIP 配置
-// =========================================================
-if (config.dns) {
-	const dns = config.dns;
+            const dns = config.dns;
 
-	// ---------- DNS Servers ----------
-	if (Array.isArray(dns.servers)) {
-		dns.servers = dns.servers
-			.map(server => {
-				if (!server || typeof server !== 'object') {
-					return server;
-				}
+            // 1. 删除旧版顶层 FakeIP 配置
+            delete dns.fakeip;
 
-				// 已经是新版 DNS server，直接保留
-				if (typeof server.type === 'string') {
-					return server;
-				}
+            // 2. 转换 DNS servers
+            if (Array.isArray(dns.servers)) {
+                dns.servers = dns.servers
+                    .filter(server => {
+                        // 完全关闭旧 FakeIP DNS server
+                        return !(
+                            server &&
+                            (
+                                server.address === 'fakeip' ||
+                                server.tag === 'dns_fakeip'
+                            )
+                        );
+                    })
+                    .map(server => {
+                        if (!server || typeof server !== 'object') {
+                            return server;
+                        }
 
-				const address = server.address;
+                        const newServer = { ...server };
+                        const address = newServer.address;
 
-				const newServer = {};
+                        // 删除旧 address_resolver
+                        if (newServer.address_resolver) {
+                            newServer.domain_resolver =
+                                newServer.address_resolver;
+                            delete newServer.address_resolver;
+                        }
 
-				if (server.tag) {
-					newServer.tag = server.tag;
-				}
+                        // 旧 rcode DNS server
+                        if (
+                            typeof address === 'string' &&
+                            address.startsWith('rcode://')
+                        ) {
+                            const code = address
+                                .substring('rcode://'.length)
+                                .toUpperCase();
 
-				// address_resolver -> domain_resolver
-				if (server.address_resolver) {
-					newServer.domain_resolver = server.address_resolver;
-				}
+                            delete newServer.address;
 
-				// detour 保留
-				if (server.detour) {
-					newServer.detour = server.detour;
-				}
+                            newServer.type = 'predefined';
 
-				// -------------------------------------------------
-				// 旧版 FakeIP
-				//
-				// 不转换成新版 type=fakeip
-				// 直接删除，避免 198.18.x.x 被错误直连
-				// -------------------------------------------------
+                            if (code === 'SUCCESS') {
+                                newServer.rcode = 'NOERROR';
+                            } else {
+                                newServer.rcode = code;
+                            }
+                        }
 
-				// -------------------------------------------------
-				// HTTP/3 DNS
-				// h3://dns.alidns.com/dns-query
-				// -------------------------------------------------
-				if (
-					typeof address === 'string' &&
-					address.startsWith('h3://')
-				) {
-					const value = address.substring(5);
-					const slashIndex = value.indexOf('/');
+                        return newServer;
+                    });
+            }
 
-					let host;
-					let path;
+            // 3. 转换 DNS rules
+            if (Array.isArray(dns.rules)) {
+                dns.rules = dns.rules
+                    .filter(rule => {
+                        if (!rule || typeof rule !== 'object') {
+                            return false;
+                        }
 
-					if (slashIndex === -1) {
-						host = value;
-						path = '/dns-query';
-					} else {
-						host = value.substring(0, slashIndex);
-						path =
-							value.substring(slashIndex) ||
-							'/dns-query';
-					}
+                        // 删除 FakeIP 规则
+                        if (rule.server === 'dns_fakeip') {
+                            return false;
+                        }
 
-					const hostPort = host.split(':');
+                        // 删除旧版 outbound DNS rule
+                        if (rule.outbound) {
+                            return false;
+                        }
 
-					newServer.type = 'h3';
-					newServer.server = hostPort[0];
-					newServer.server_port =
-						hostPort[1] ? Number(hostPort[1]) : 443;
-					newServer.path = path;
+                        return true;
+                    })
+                    .map(rule => {
+                        const newRule = { ...rule };
 
-					return newServer;
-				}
+                        // 旧 server -> 新 route action
+                        if (newRule.server) {
+                            const server = newRule.server;
 
-				// -------------------------------------------------
-				// UDP DNS
-				// -------------------------------------------------
-				if (
-					typeof address === 'string' &&
-					address.startsWith('udp://')
-				) {
-					const value = address.substring(6);
-					const hostPort = value.split(':');
+                            delete newRule.server;
 
-					newServer.type = 'udp';
-					newServer.server = hostPort[0];
-					newServer.server_port =
-						hostPort[1] ? Number(hostPort[1]) : 53;
+                            // block / dns_block
+                            if (
+                                server === 'block' ||
+                                server === 'dns_block'
+                            ) {
+                                newRule.action = 'predefined';
+                                newRule.rcode = 'NXDOMAIN';
+                            } else {
+                                newRule.action = 'route';
+                                newRule.server = server;
+                            }
+                        }
 
-					return newServer;
-				}
+                        return newRule;
+                    });
+            }
 
-				// -------------------------------------------------
-				// TCP DNS
-				// -------------------------------------------------
-				if (
-					typeof address === 'string' &&
-					address.startsWith('tcp://')
-				) {
-					const value = address.substring(6);
-					const hostPort = value.split(':');
+            // 4. 删除已经废弃的 independent_cache
+            delete dns.independent_cache;
 
-					newServer.type = 'tcp';
-					newServer.server = hostPort[0];
-					newServer.server_port =
-						hostPort[1] ? Number(hostPort[1]) : 53;
+            // 5. 再次保险删除旧 FakeIP
+            delete dns.fakeip;
+        }
 
-					return newServer;
-				}
+        // ================================
+        // VLESS 1.14 compatibility
+        // ================================
+        if (Array.isArray(config.outbounds)) {
+            for (const outbound of config.outbounds) {
+                if (
+                    outbound &&
+                    outbound.type === 'vless' &&
+                    typeof outbound.encryption === 'string'
+                ) {
+                    delete outbound.encryption;
+                }
+            }
+        }
 
-				// -------------------------------------------------
-				// 普通 IP DNS
-				// -------------------------------------------------
-				if (
-					typeof address === 'string' &&
-					(
-						/^\d{1,3}(\.\d{1,3}){3}$/.test(address) ||
-						address.includes(':')
-					)
-				) {
-					newServer.type = 'udp';
-					newServer.server = address;
-					newServer.server_port = 53;
+        // ================================
+        // 最终保险清理
+        // ================================
+        if (config.dns) {
+            delete config.dns.fakeip;
 
-					return newServer;
-				}
+            if (Array.isArray(config.dns.servers)) {
+                config.dns.servers =
+                    config.dns.servers.filter(server =>
+                        !(
+                            server &&
+                            (
+                                server.address === 'fakeip' ||
+                                server.tag === 'dns_fakeip'
+                            )
+                        )
+                    );
+            }
 
-				// 未知格式保留
-				return server;
+            if (Array.isArray(config.dns.rules)) {
+                config.dns.rules =
+                    config.dns.rules.filter(rule =>
+                        !(
+                            rule &&
+                            (
+                                rule.server === 'dns_fakeip' ||
+                                rule.outbound
+                            )
+                        )
+                    );
+            }
 
-			})
-			.filter(Boolean);
-	}
+            delete config.dns.independent_cache;
+        }
 
-	// -------------------------------------------------
-	// 删除旧版 FakeIP 配置
-	// -------------------------------------------------
-	if ('fakeip' in dns) {
-		delete dns.fakeip;
-	}
+        // 必须无条件重新生成 JSON
+        convertContent = JSON.stringify(config);
 
-	// -------------------------------------------------
-	// DNS Rules
-	// -------------------------------------------------
-	if (Array.isArray(dns.rules)) {
-		dns.rules = dns.rules
-			.filter(rule => {
-				if (!rule || typeof rule !== 'object') {
-					return false;
-				}
+    } catch (e) {
+        console.log(
+            'Sing-box 1.14+ compatibility fix failed:',
+            e.message
+        );
 
-				// 删除所有 FakeIP DNS 规则
-				if (rule.server === 'dns_fakeip') {
-					return false;
-				}
-
-				if (
-					rule.action === 'route' &&
-					rule.server === 'dns_fakeip'
-				) {
-					return false;
-				}
-
-				return true;
-			})
-			.map(rule => {
-				// 已经是新版 action 格式
-				if (rule.action) {
-					return rule;
-				}
-
-				const newRule = { ...rule };
-
-				if (typeof rule.server === 'string') {
-					const serverTag = rule.server;
-
-					delete newRule.server;
-
-					// 旧 dns_block / block
-					// 改成新版 predefined action
-					if (
-						serverTag === 'dns_block' ||
-						serverTag === 'block'
-					) {
-						newRule.action = 'predefined';
-						newRule.rcode = 'NOERROR';
-					} else {
-						// 普通 DNS server
-						newRule.action = 'route';
-						newRule.server = serverTag;
-					}
-				}
-
-				return newRule;
-			});
-	}
-
-	// 删除旧 block DNS server
-	if (Array.isArray(dns.servers)) {
-		dns.servers = dns.servers.filter(server => {
-			if (!server || typeof server !== 'object') {
-				return true;
-			}
-
-			return server.tag !== 'block';
-		});
-	}
-
-	// 1.14+ 不再使用
-	if ('independent_cache' in dns) {
-		delete dns.independent_cache;
-	}
-
-	config.dns = dns;
-}
-```
-
-}
-
-			config.dns = dns;
-		}
-
-		// =========================================================
-		// Sing-box VLESS 兼容修复
-		// 某些转换器会把 VLESS 的 ML-KEM encryption
-		// 写入 outbound，但新版 sing-box 不支持该字段
-		// =========================================================
-		if (Array.isArray(config.outbounds)) {
-			for (const outbound of config.outbounds) {
-				if (
-					outbound &&
-					outbound.type === 'vless' &&
-					typeof outbound.encryption === 'string'
-				) {
-					delete outbound.encryption;
-				}
-			}
-		}
-
-		convertContent = JSON.stringify(config);
-
-	} catch (e) {
-		console.log('Sing-box 1.14+ DNS/VLESS兼容修复失败:', e.message);
-	}
+        // 不要再静默返回原来的 legacy JSON
+        return new Response(
+            JSON.stringify({
+                error: 'Sing-box config conversion failed',
+                message: e.message
+            }),
+            {
+                status: 500,
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                }
+            }
+        );
+    }
 }
 			// 修复Mihomo wireguard节点缺失dns参数（核心兼容修复）
 			if (订阅格式 === 'clash') convertContent = clashMetaWireguardFix(convertContent);
