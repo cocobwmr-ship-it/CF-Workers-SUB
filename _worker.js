@@ -150,7 +150,7 @@ export default {
 		// URL参数强制格式优先级最高
 		if (url.searchParams.has('b64') || url.searchParams.has('base64')) 订阅格式 = 'base64';
 		else if (forceMihomo) 追加UA = 'clashmeta';
-		else if (forceSingBox) 追加UA = 'singbox-v1.11.4';
+		else if (forceSingBox) 追加UA = 'singbox-v1.14.0';
 		else if (forceSurge) 追加UA = 'surge';
 		else if (forceQuanX) 追加UA = 'Quantumult%20X';
 		else if (forceLoon) 追加UA = 'Loon';
@@ -278,7 +278,37 @@ export default {
 if (订阅格式 === 'singbox') {
 	try {
 		const config = JSON.parse(convertContent);
-
+"dns": {
+  "servers": [
+    {
+      "type": "tls",
+      "tag": "dns_proxy",
+      "server": "1.1.1.1",
+      "server_port": 853
+    },
+    {
+      "type": "h3",
+      "tag": "dns_direct",
+      "server": "dns.alidns.com",
+      "server_port": 443,
+      "path": "/dns-query",
+      "detour": "DIRECT"
+    },
+    {
+      "type": "fakeip",
+      "tag": "dns_fakeip",
+      "inet4_range": "198.18.0.0/15",
+      "inet6_range": "fc00::/18"
+    },
+    {
+      "type": "udp",
+      "tag": "dns_resolver",
+      "server": "223.5.5.5",
+      "server_port": 53,
+      "detour": "DIRECT"
+    }
+  ]
+}
 		if (Array.isArray(config.outbounds)) {
 			for (const outbound of config.outbounds) {
 				if (
