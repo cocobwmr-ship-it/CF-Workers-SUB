@@ -26,13 +26,7 @@ PrivateKey = 4LAbEdQ2arrqwGfPUpTB9FWkAk86Rz2YJ9hXnZiN63I=
 Address = 10.0.0.2/32
 DNS = 1.1.1.1, 1.0.0.1
 MTU = 1280
-
-# 美国🇺🇸销售用 04更新-1 (美国🇺🇸销售用 04更新)
-[Peer]
-PublicKey = DL/658UAJzfEL+Qaxmj8Z1gtkJmHPmkptlXFmaYQsCk=
-AllowedIPs = 0.0.0.0/0, ::/0
-Endpoint = tk.yienergysmarthome.com:38446
-PersistentKeepalive = 25
+wireguard://4LAbEdQ2arrqwGfPUpTB9FWkAk86Rz2YJ9hXnZiN63I%3D@tk.yienergysmarthome.com:38446?publickey=DL%2F658UAJzfEL%2BQaxmj8Z1gtkJmHPmkptlXFmaYQsCk%3D&address=10.0.0.2%2F32&mtu=1280&dns=1.1.1.1%2C%201.0.0.1#%E7%BE%8E%E5%9B%BD%F0%9F%87%BA%F0%9F%87%B8%E9%94%80%E5%94%AE%E7%94%A8%2004%E6%9B%B4%E6%96%B0
 vless://bWxrZW03Njh4MjU1MTlwbHVzLm5hdGl2ZS4wcnR0Lm1YWXRPUnhRb1VoV2k5aU1Telo1NWtiYlZEWTQ5RnkyVUZ4cE9HWTZfUVk6NzFhMWNmZTEtYjZiNC00ZjNmLThmNmYtMzAzNjVmYjU5ODAzQHVjbjIueWllbmVyZ3lzbWFydGhvbWUuY29tOjE4NTQ3?path=/hxhxyzy&remarks=%E8%8B%B1%E5%9B%BD%F0%9F%87%AC%F0%9F%87%A7%E6%9B%B4%E6%96%B001&obfs=websocket&tls=1&alpn=h2,http/1.1&udp=1&xtls=2
 vless://bWxrZW03Njh4MjU1MTlwbHVzLm5hdGl2ZS4wcnR0Ll9TbFlGcFJLNWtFNjNtamN5bGV1a3F2UW5zRURvS1RaV2FkdGZFS0kweXM6ODNjNmNkZDUtMGQxOS00ZTliLTlhNzQtYzZhYmQ2ZGY5NjZlQHVjbjIueWllbmVyZ3lzbWFydGhvbWUuY29tOjMxNzU0?remarks=%E8%8B%B1%E5%9B%BD%F0%9F%87%AC%F0%9F%87%A7%E6%9B%B4%E6%96%B002&tls=1&peer=apple.com&udp=1&xtls=2&pbk=LA2d3LpQ6514zPzbGTxie9tlkrTvnOorJEIVPolVdnI&sid=17e184db
 vmess://YXV0bzoyZDgwZGQyMy0yNDY1LTQxOWItYzk3Yi0xMTFjYThmMDk1MDBAdWNuMi55aWVuZXJneXNtYXJ0aG9tZS5jb206MzgyMTY?path=/qqcndb&remarks=%E8%8B%B1%E5%9B%BD%F0%9F%87%AC%F0%9F%87%A7%E6%9B%B4%E6%96%B003&obfs=websocket&tls=1&udp=1&alterId=0
