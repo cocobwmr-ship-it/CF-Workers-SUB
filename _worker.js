@@ -30,8 +30,21 @@ wireguard://4LAbEdQ2arrqwGfPUpTB9FWkAk86Rz2YJ9hXnZiN63I%3D@tk.yienergysmarthome.
 hysteria2://5a9278q4esw0nx0k@185.217.110.154:43971?#%E8%8B%B1%E5%9B%BD%F0%9F%87%AC%F0%9F%87%A7%20%E9%94%80%E5%94%AE%E7%94%A801%20%E6%9B%B4%E6%96%B0
 hysteria2://5a9278q4esw0nx0k@185.217.110.154:18936?#%E8%8B%B1%E5%9B%BD%F0%9F%87%AC%F0%9F%87%A7%20%E9%94%80%E5%94%AE%E7%94%A802%20%E6%9B%B4%E6%96%B0
 tuic://2aa84e66-312e-4494-86e8-35e9a84f0c9a%3Am2bf2dfxnpwnfesc@185.217.110.154:47588?alpn=h3&congestion_control=bbr#%E8%8B%B1%E5%9B%BD%F0%9F%87%AC%F0%9F%87%A7%20%E9%94%80%E5%94%AE%E7%94%A803%20%E6%9B%B4%E6%96%B0
-wireguard://gNtPIaO%2F%2BIZw96%2BbP2X1Q7vuLbowqFQoi9kcvdVrtFw%3D@185.217.110.154:38408?publickey=NZL9Wq4c6eRrp71v9Df6EN9jUbtPfMo49Sm1fYyNMm8%3D&address=10.0.0.2%2F32&mtu=1280&dns=1.1.1.1%2C%201.0.0.1#%E8%8B%B1%E5%9B%BD%F0%9F%87%AC%F0%9F%87%A7%20%E9%94%80%E5%94%AE%E7%94%A804%20%E6%9B%B4%E6%96%B0
-hysteria2://9eb788c8-30d4-412d-d161-2f1c7d399d59@em.yienergysmarthome.com:34268?insecure=1#Email%E5%A4%87%E7%94%A8
+# TUIC v5 Client Configuration (Clash / Mihomo / Clash Verge)
+# 英国🇬🇧 销售用03 更新 - sales02
+proxies:
+  - name: "英国🇬🇧 销售用03 更新 - sales02"
+    type: tuic
+    server: 185.217.110.154
+    port: 47588
+    uuid: 2aa84e66-312e-4494-86e8-35e9a84f0c9a
+    password: "m2bf2dfxnpwnfesc"
+    alpn:
+      - h3
+    sni: 185.217.110.154
+    congestion-controller: bbr
+    udp-relay-mode: native
+    reduce-rtt: truehysteria2://9eb788c8-30d4-412d-d161-2f1c7d399d59@em.yienergysmarthome.com:34268?insecure=1#Email%E5%A4%87%E7%94%A8
 hysteria2://f9c160a2-c412-44ba-9723-4efc71c81e71@em.yienergysmarthome.com:42474?insecure=1#Email%E5%A4%87%E7%94%A81
 
 
